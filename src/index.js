@@ -11,7 +11,7 @@ const mongoose = require("mongoose");
 const connectDB = require("./app/config/dbConnect");
 
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3500;
 connectDB();
 // app.use(morgan('combined'));
 app.use(express.urlencoded({
@@ -37,7 +37,7 @@ mongoose.connection.once("open", () => {
         const model = await loadModel();
       })();
     console.log("Connected to MongoDB");
-    app.listen(port, () => console.log(`App are listening at ${port}`));
+    app.listen(PORT, () => console.log(`App are listening at ${PORT}`));
   });
 
  
