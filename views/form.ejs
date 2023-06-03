@@ -1,0 +1,60 @@
+<style>
+    .title{ color: #31E1F7; text-align: center; font-size: 3rem; }
+    form{ width: 40%; margin: 0 auto; padding: 0.5rem;}
+    .label_name{ color: #400D51; font-size: 1.5rem; margin: 0 0.5rem 1rem 0; }
+    .uploads{ margin: 0 0 1rem 3rem; padding: 0;}
+    .btn{ width: 100%; text-align: center;}
+    .btn_submit, .btn_cancel{ display: inline-block; width: 35%; font-size: 1rem;
+        border-radius: 7px; padding: 0.5rem; background: black; color: white;
+        border: none; cursor: pointer; margin-right: 2rem;}
+    .btn_upload{ font-size: 0.9rem; cursor: pointer;}
+    .btn_hover:hover{
+        color: yellow;
+    }
+    .btn_submit{
+        margin-right: 2rem;
+    }
+</style>
+<h1 class="title">MY DETECTOR</h1>
+<form action="/detect" method="post" enctype="multipart/form-data" >
+    <div class="uploads">
+        <label class="label_name">Select picture: </label>
+        <input class="btn_upload" type="file" name="image_uploaded" id="image_uploaded">
+        <br>
+        <span class="error" id="file_error"></span>
+    </div>
+    <div class="btn">
+        <input class="btn_submit btn_hover" type="submit" value="Upload" name="btn" onclick="return validateForm(event)">
+        <input class="btn_cancel btn_hover" type="reset" value="Cancel">
+    </div>
+</form>
+<script>
+    function validateForm(event) {
+        let fileInput = document.getElementById('image_uploaded');
+        let file = fileInput.files[0];
+        let fileError = document.getElementById('file_error');
+
+        if(!file){
+            fileError.textContent = "Please select an image to upload.";
+            fileError.style.display = "inline-block";
+            fileError.style.marginTop = "0.5rem";
+            fileError.style.color = "red";
+            event.preventDefault();
+            return false;
+        }
+
+        let fileType = file.type;
+        if(!fileType.startsWith('image/')){
+            fileError.textContent = "Invalid file type. Please upload an image.";
+            fileError.style.display = "inline-block";
+            fileError.style.marginTop = "0.5rem";
+            fileError.style.color = "red";
+            event.preventDefault();
+            return false;
+        }
+
+        fileError.textContent = "";
+        fileError.style.display = "none";
+        return true;
+    }
+</script>

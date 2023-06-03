@@ -1,0 +1,35 @@
+<%- include('partials/header.ejs')  %>
+    <style>
+        #uploaded_img{ display: block; margin-left: auto; margin-right: auto;
+            width: 400px; margin-top: 2rem; margin-bottom: 1.5rem; height: 400px;
+            border-radius: 10px;
+        }
+
+        #btn_back{ display: block; padding: 0.5rem; cursor: pointer; margin: 0 auto;
+            background-color: black; color: white; border: none; border-radius: 5px; width: 70px;
+        }
+
+        a{
+            text-decoration: none;
+        }
+    </style>
+    <title>NINEDASH</title>
+</head>
+<body>
+    <img id="uploaded_img" src="<%= finalImage %>" alt="">
+
+    <a href="/">
+        <button id="btn_back" onmouseover="mouseover()" onmouseout="mouseout()">Back</button>
+    </a>
+
+<script>
+    function mouseover() {
+        document.getElementById('btn_back').style.color = 'yellow';
+    }
+
+    function mouseout() {
+        document.getElementById('btn_back').style.color = 'white';
+    }
+</script>
+</body>
+</html>

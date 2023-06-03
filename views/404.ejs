@@ -1,0 +1,31 @@
+<%- include('partials/header.ejs')  %>
+    <style>
+        .error_title{ font-size: 4rem; color: red; display: flex; 
+            justify-content: center; align-items: center;
+        }
+        #btn_back{ display: block; padding: 0.5rem; cursor: pointer; margin: 0 auto;
+            background-color: black; color: white; border: none; border-radius: 5px; width: 70px;
+        }
+
+        a{
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="error_title">404 NOT FOUND</h1>
+    <a href="/">
+        <button id="btn_back" onmouseover="mouseover()" onmouseout="mouseout()">Back</button>
+    </a>
+
+    <script>
+        function mouseover() {
+            document.getElementById('btn_back').style.color = 'yellow';
+        }
+
+        function mouseout() {
+            document.getElementById('btn_back').style.color = 'white';
+        }
+    </script>
+</body>
+</html>
