@@ -16,8 +16,19 @@
     <title>NINEDASH</title>
 </head>
 <body>
-    <img id="uploaded_img" src="<%= finalImage %>" alt="">
-
+    <% if (predictions.length === 0) { %>
+        <h1>No objects detected in the uploaded images</h1>
+    <% } else { %>
+        <h1>Predictions for Uploaded Images:</h1>
+        <% for(let i = 0; i < predictions.length; i++) {%>
+            <h2>Image <%= i + 1%>:</h2>
+            <% if(finalImages[i]) { %>
+                <img src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img">
+            <% } else { %>
+                <p>No object detected in this image.</p>
+            <% } %>
+        <% } %>
+    <% } %>
     <a href="/">
         <button id="btn_back" onmouseover="mouseover()" onmouseout="mouseout()">Back</button>
     </a>
