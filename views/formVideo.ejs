@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+    <style>
+        .main-margin {
+        margin-left:10%;
+        margin-top:4%;
+        }
+
+        .custom-label {
+        width: 14%;
+        display: inline-block;
+        }
+
+        .form-group {
+        padding: 1%
+        }
+    </style>
+</head>
+<body class='main-margin'>
+    <div id='main-div'>
+      <form method="post" action="/detect-video" enctype="multipart/form-data" name='videoUpload' id='video-upload' >
+        <div class='form-group'>
+          <label class='custom-label'> Select file to upload: </label>
+          <input accept="video/mp4" type="file" name="video_uploaded">
+        </div>
+        <div style="padding-left:15%">
+          <input type="submit" id='submit' value="Upload File" name="submit" onclick="return validateForm(event)">
+        </div>
+      </form>
+    </div>
+    <div style="padding-left:15%" id='message'>
+    <script>
+        function onSubmit(e) {
+            e.preventDefault();
+            var customMessage = document.getElementById('message');
+            if(validateForm(customMessage)) {
+                uploadVideo(customMessage);
+            }
+        }
+
+        function validateForm(customMessage) {
+            const uploadedFile = document.getElementById('video-upload').elements[0].files[0];
+            if(!uploadedFile) {
+                customMessage.innerHTML = "Please select a video to upload";
+                return false;
+            }
+            const fileLimit = 104857600;
+            if(uploadedFile.size > fileLimit) {
+                customMessage.innerHTML = "Maximum video size allowed: 100MB";
+                return false;
+            }
+            return true;
+        }
+
+        // function uploadVideo(customMessage) {
+        //     document.getElementById("submit").disabled = true;
+        //     customMessage.innerHTML = 'uploading video..'
+        //     var formElement = document.getElementById("video-upload");
+        //     var request = new XMLHttpRequest();
+        //     request.open("POST", "/detect_video", true);
+        //     request.onload = onComplete;
+        //     request.upload.onprogress = fileUploadPercentage;
+        //     const data = new FormData(formElement);
+        //     request.send(data);
+        // }
+
+        function fileUploadPercentage(e) {
+            if (e.lengthComputable) {
+                var customMessage = document.getElementById('message');
+                var percentage = (e.loaded / e.total) * 100;
+                customMessage.innerHTML = 'Uploading Video: ' + percentage + ' %';
+            }
+        }
+
+    </script>
+<%- include('partials/footer') %>

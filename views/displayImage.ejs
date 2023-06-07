@@ -19,14 +19,15 @@
     <% if (predictions.length === 0) { %>
         <h1>No objects detected in the uploaded images</h1>
     <% } else { %>
-        <h1>Predictions for Uploaded Images:</h1>
+        <h1 class="text-center mt-4">Predictions for Uploaded Images</h1>
         <% for(let i = 0; i < predictions.length; i++) {%>
-            <h2>Image <%= i + 1%>:</h2>
-            <% if(finalImages[i]) { %>
-                <img src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img">
-            <% } else { %>
-                <p>No object detected in this image.</p>
-            <% } %>
+            <div>
+                <% if(finalImages[i]) { %>
+                    <img class="block mx-auto w-96 mb-6 mt-8 h-96 rounded-lg" src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img" >
+                <% } else { %>
+                    <p>No object detected in this image.</p>
+                <% } %>
+            </div>
         <% } %>
     <% } %>
     <a href="/">
@@ -42,5 +43,4 @@
         document.getElementById('btn_back').style.color = 'white';
     }
 </script>
-</body>
-</html>
+<%- include('partials/footer.ejs') %>
