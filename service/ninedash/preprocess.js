@@ -5,11 +5,6 @@ const { loadImage } = require("canvas");
 const preprocess = async (source, modelWidth, modelHeight) => {
     let xRatio = 1,
         yRatio = 1;
-    let imgWidth, imgHeight;
-    // const imgBuffer = await source.toBuffer();
-    const image = await loadImage(source);
-    imgWidth = image.width;
-    imgHeight = image.height;
     const sharpImg = await sharp(source)
         .ensureAlpha()
         .resize({

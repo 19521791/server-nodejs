@@ -6,7 +6,7 @@ const fs = require("fs");
 const Image = require("../model/image");
 const extractFrame = require('../service/ninedash/extractFrame');
 const generateVideo = require('../service/ninedash/generateVideo');
-const removeFile = require('../service/ninedash/removeFiles');
+const { predictions, render, frames } = require('../middleware/progressBar');
 
 const classThreshold = 0.2;
 
@@ -75,13 +75,7 @@ const getImage = async (req, res) => {
                     const predictedClass = firstPrediction.class[0];
                     const [xRatio, yRatio] = firstPrediction.ratio;
 
-                    console.log(
-                        "Coordinate bboxes: ",
-                        xmin,
-                        ymin,
-                        width,
-                        height,
-                    );
+                    console.log( "Coordinate bboxes: ", xmin, ymin, width, height,);
                     console.log("Confident: ", score);
                     console.log("Class: ", predictedClass);
 
@@ -133,13 +127,17 @@ const uploadVideo = async (req, res) => {
 
 const renderVideo = async (req, res) => {
     const model = await loadModel();
+    let processPredictions = 0;
+    let processRender = 0;
+    let processFrames = 0;
+
     try{
         const videoPath = path.join(__dirname, '..', 'uploadVideos', req.params.filename);
         const destPath = path.join(__dirname, '..', 'FRAMES');
         const outputPredictFrame = path.join(__dirname, '..', 'DETECTS');
 
         await extractFrame(videoPath, destPath);
-  
+
         try {
             const framePaths = await new Promise((resolve, reject) => {
                 fs.readdir(destPath, (err, files) => {
@@ -151,10 +149,19 @@ const renderVideo = async (req, res) => {
                   resolve(paths);
                 });
               });
+            const totalFrames = framePaths.length;
+            const progressPredictions = predictions(totalFrames);
+            const progressRender = render(totalFrames);
+            const progressFrames = frames(totalFrames);
+
             const frameNames = fs.readdirSync(destPath);
+            
             const predictionsPromises = framePaths.map(async (file) => {
                 const predictions = await detectImage(file, model);
-                console.log('Prediction is processing...');
+
+                processPredictions++;
+                progressPredictions.update(processPredictions);
+
                 return predictions;
             });
 
@@ -172,7 +179,10 @@ const renderVideo = async (req, res) => {
                         const score = firstPrediction.score[0];
                         const predictedClass = firstPrediction.class[0];
                         const [xRatio, yRatio] = firstPrediction.ratio;
-                        console.log(`${frameNames[index]} is processing...`);
+
+                        processRender++;
+                        progressRender.update(processRender);
+                       
                         return renderBox(
                             handleImage,
                             classThreshold,
@@ -186,6 +196,9 @@ const renderVideo = async (req, res) => {
                                 fs.writeFileSync(outputPath, buffer);
                                 tempImage = buffer.toString("base64");
 
+                                processFrames++;
+                                progressFrames.update(processFrames);
+                               
                                 return `data:image/jpeg;base64, ${tempImage}`;
                             })
                             .catch((error) => {
@@ -204,12 +217,12 @@ const renderVideo = async (req, res) => {
     
             await generateVideo(fps, outputPredictFrame, outputVideoPath);
 
-            // await removeFile(destPath, outputPredictFrame);
         } catch (err) {
         console.error('Error in here:', err);
         } 
         
         res.send('My name is Long');
+        
     } catch(err){
         console.log(err);
     }

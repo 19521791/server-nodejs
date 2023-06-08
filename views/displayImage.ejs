@@ -12,6 +12,11 @@
         a{
             text-decoration: none;
         }
+        .container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
     <title>NINEDASH</title>
 </head>
@@ -21,7 +26,7 @@
     <% } else { %>
         <h1 class="text-center mt-4">Predictions for Uploaded Images</h1>
         <% for(let i = 0; i < predictions.length; i++) {%>
-            <div>
+            <div class="container">
                 <% if(finalImages[i]) { %>
                     <img class="block mx-auto w-96 mb-6 mt-8 h-96 rounded-lg" src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img" >
                 <% } else { %>

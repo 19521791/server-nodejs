@@ -24,11 +24,28 @@
         </div>
         <div style="padding-left:15%">
           <input type="submit" id='submit' value="Upload File" name="submit" onclick="return validateForm(event)">
+          <input class="btn_cancel btn_hover" type="reset" value="Cancel">
         </div>
       </form>
+      <a href="/">
+        <button id="btn_back" >Back</button>
+    </a>
     </div>
-    <div style="padding-left:15%" id='message'>
+    <div id="progressBarContainer">
+        <div id="progressBar"></div>
+    </div>
+    <p id="progressMessage"></p>
     <script>
+        const socket = io("http://localhost:3500");
+        socket.on('progress', ({ message, progressPercentage }) => {
+            updateLoadingBar(message, progressPercentage);
+        });
+
+        function updateLoadingBar(message, progressPercentage) {
+            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+            document.getElementById('progressMessage').innerText = message;
+        }
+
         function onSubmit(e) {
             e.preventDefault();
             var customMessage = document.getElementById('message');
