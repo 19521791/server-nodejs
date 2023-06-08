@@ -4,9 +4,10 @@ const detectImage = require("../service/ninedash/detect");
 const renderBox = require("../service/ninedash/renderBox");
 const fs = require("fs");
 const Image = require("../model/image");
-const extractFrame = require('../service/ninedash/extractFrame');
-const generateVideo = require('../service/ninedash/generateVideo');
-const { predictions, render, frames } = require('../middleware/progressBar');
+const extractFrame = require("../service/ninedash/extractFrame");
+const generateVideo = require("../service/ninedash/generateVideo");
+const { predictions, render, frames } = require("../middleware/progressBar");
+const { sendProgressUpdate, startWebSocketServer } = require('../middleware/webSocket');
 
 const classThreshold = 0.2;
 
@@ -75,7 +76,13 @@ const getImage = async (req, res) => {
                     const predictedClass = firstPrediction.class[0];
                     const [xRatio, yRatio] = firstPrediction.ratio;
 
-                    console.log( "Coordinate bboxes: ", xmin, ymin, width, height,);
+                    console.log(
+                        "Coordinate bboxes: ",
+                        xmin,
+                        ymin,
+                        width,
+                        height,
+                    );
                     console.log("Confident: ", score);
                     console.log("Class: ", predictedClass);
 
@@ -107,7 +114,10 @@ const getImage = async (req, res) => {
 
         await Image.deleteMany({ image: { $in: imageNamesToDelete } });
 
-        res.render("displayImage.ejs", { predictions: allPredictions, finalImages });
+        res.render("displayImage.ejs", {
+            predictions: allPredictions,
+            finalImages,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send("Error detecting objects in image.");
@@ -115,47 +125,74 @@ const getImage = async (req, res) => {
 };
 
 const uploadVideo = async (req, res) => {
-    if(!req.file){
-        res.status(400).send('No video uploaded!');
+    if (!req.file) {
+        res.status(400).send("No video uploaded!");
     } else {
-        console.log('Success upload video');
-        const videoUrl = '/render-video/' + req.file.filename;
+        console.log("Success upload video");
+        const videoUrl = "/render-video/" + req.file.filename;
         res.redirect(videoUrl);
     }
-    
-}
+};
 
 const renderVideo = async (req, res) => {
     const model = await loadModel();
+
+    startWebSocketServer();
+    const updateProgressPredictions = () => {
+        sendProgressUpdate({
+          processPredictions,
+        });
+      };
+    
+      const updateProgressRender = () => {
+        sendProgressUpdate({
+          processRender,
+        });
+      };
+    
+      const updateProgressFrames = () => {
+        sendProgressUpdate({
+          processFrames,
+        });
+      };
+
     let processPredictions = 0;
     let processRender = 0;
     let processFrames = 0;
 
-    try{
-        const videoPath = path.join(__dirname, '..', 'uploadVideos', req.params.filename);
-        const destPath = path.join(__dirname, '..', 'FRAMES');
-        const outputPredictFrame = path.join(__dirname, '..', 'DETECTS');
+    try {
+        const videoPath = path.join(
+            __dirname,
+            "..",
+            "uploadVideos",
+            req.params.filename,
+        );
+        const destPath = path.join(__dirname, "..", "FRAMES");
+        const outputPredictFrame = path.join(__dirname, "..", "DETECTS");
 
         await extractFrame(videoPath, destPath);
 
         try {
             const framePaths = await new Promise((resolve, reject) => {
                 fs.readdir(destPath, (err, files) => {
-                  if (err) {
-                    reject(err);
-                    return;
-                  }
-                  const paths = files.map((file) => path.join(destPath, file));
-                  resolve(paths);
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    const paths = files.map((file) =>
+                        path.join(destPath, file),
+                    );
+                    resolve(paths);
                 });
-              });
+            });
             const totalFrames = framePaths.length;
             const progressPredictions = predictions(totalFrames);
             const progressRender = render(totalFrames);
             const progressFrames = frames(totalFrames);
 
             const frameNames = fs.readdirSync(destPath);
-            
+
+            progressPredictions.start();
             const predictionsPromises = framePaths.map(async (file) => {
                 const predictions = await detectImage(file, model);
 
@@ -165,24 +202,35 @@ const renderVideo = async (req, res) => {
                 return predictions;
             });
 
-            const allPredictions = await Promise.all(predictionsPromises); 
+            const allPredictions = await Promise.all(predictionsPromises);
+            progressPredictions.stop();
 
+            progressRender.start();
+            progressFrames.start();
             const finalImagesPromises = allPredictions.map(
                 async (prediction, index) => {
                     const firstPrediction = prediction[0];
-                    const handleImage = firstPrediction ? firstPrediction.buffer : null;
+                    const handleImage = firstPrediction
+                        ? firstPrediction.buffer
+                        : null;
 
-                    const outputPath = path.join(__dirname, "..", "DETECTS", frameNames[index]);
+                    const outputPath = path.join(
+                        __dirname,
+                        "..",
+                        "DETECTS",
+                        frameNames[index],
+                    );
 
                     if (firstPrediction) {
-                        const [xmin, ymin, width, height] = firstPrediction.bbox;
+                        const [xmin, ymin, width, height] =
+                            firstPrediction.bbox;
                         const score = firstPrediction.score[0];
                         const predictedClass = firstPrediction.class[0];
                         const [xRatio, yRatio] = firstPrediction.ratio;
 
                         processRender++;
                         progressRender.update(processRender);
-                       
+
                         return renderBox(
                             handleImage,
                             classThreshold,
@@ -198,7 +246,7 @@ const renderVideo = async (req, res) => {
 
                                 processFrames++;
                                 progressFrames.update(processFrames);
-                               
+
                                 return `data:image/jpeg;base64, ${tempImage}`;
                             })
                             .catch((error) => {
@@ -211,22 +259,28 @@ const renderVideo = async (req, res) => {
             );
 
             const finalImages = await Promise.all(finalImagesPromises);
-            const outputVideoPath = path.join(__dirname, '..','outputVideos', req.params.filename);
+            progressRender.stop();
+            progressFrames.stop();
+
+            const outputVideoPath = path.join(
+                __dirname,
+                "..",
+                "outputVideos",
+                req.params.filename,
+            );
 
             const fps = 30;
-    
-            await generateVideo(fps, outputPredictFrame, outputVideoPath);
 
+            await generateVideo(fps, outputPredictFrame, outputVideoPath);
         } catch (err) {
-        console.error('Error in here:', err);
-        } 
-        
-        res.send('My name is Long');
-        
-    } catch(err){
+            console.error("Error in here:", err);
+        }
+
+        res.send("My name is Long");
+    } catch (err) {
         console.log(err);
     }
-}
+};
 
 module.exports = {
     uploadImage,
