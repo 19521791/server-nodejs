@@ -6,7 +6,7 @@ const routeNineDash = require("./route/nineDash");
 const morgan = require("morgan");
 const notfound = require("./route/404");
 const viewEngine = require("./config/viewEngine");
-const video = require('./route/nineDashVideo');
+const video = require("./route/nineDashVideo");
 
 app = express();
 app.use(viewEngine);
