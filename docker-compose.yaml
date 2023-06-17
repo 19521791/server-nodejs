@@ -1,0 +1,18 @@
+version: "3"
+services:
+  my-container:
+    image: server
+    ports:
+      - 3500:8080
+    volumes:
+      - /home/long1100/temp:/usr/src/app
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo
+    ports: 
+      - 27017:27017
+    volumes:
+      - ~/Database:/data/db
+volumes:
+  ~/Database
