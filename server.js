@@ -4,4 +4,4 @@ const connectDB = require("./config/db.config");
 const { PORT } = process.env;
 
 // connectDB();
-server.listen(PORT, () => console.log(`App are listening at ${PORT}`));
+app.listen(PORT, () => console.log(`App are listening at ${PORT}`));

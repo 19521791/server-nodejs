@@ -6,8 +6,7 @@ const fs = require("fs");
 const Image = require("../model/image");
 const extractFrame = require("../service/ninedash/extractFrame");
 const generateVideo = require("../service/ninedash/generateVideo");
-const { predictions, render, frames } = require("../middleware/progressBar");
-const { sendProgressUpdate, startWebSocketServer } = require('../middleware/webSocket');
+// const { predictions, render, frames } = require("../middleware/progressBar");
 
 const classThreshold = 0.2;
 
@@ -137,28 +136,9 @@ const uploadVideo = async (req, res) => {
 const renderVideo = async (req, res) => {
     const model = await loadModel();
 
-    startWebSocketServer();
-    const updateProgressPredictions = () => {
-        sendProgressUpdate({
-          processPredictions,
-        });
-      };
-    
-      const updateProgressRender = () => {
-        sendProgressUpdate({
-          processRender,
-        });
-      };
-    
-      const updateProgressFrames = () => {
-        sendProgressUpdate({
-          processFrames,
-        });
-      };
-
-    let processPredictions = 0;
-    let processRender = 0;
-    let processFrames = 0;
+    // let processPredictions = 0;
+    // let processRender = 0;
+    // let processFrames = 0;
 
     try {
         const videoPath = path.join(
@@ -185,28 +165,28 @@ const renderVideo = async (req, res) => {
                     resolve(paths);
                 });
             });
-            const totalFrames = framePaths.length;
-            const progressPredictions = predictions(totalFrames);
-            const progressRender = render(totalFrames);
-            const progressFrames = frames(totalFrames);
+            // const totalFrames = framePaths.length;
+            // const progressPredictions = predictions(totalFrames);
+            // const progressRender = render(totalFrames);
+            // const progressFrames = frames(totalFrames);
 
             const frameNames = fs.readdirSync(destPath);
 
-            progressPredictions.start();
+            // progressPredictions.start();
             const predictionsPromises = framePaths.map(async (file) => {
                 const predictions = await detectImage(file, model);
 
-                processPredictions++;
-                progressPredictions.update(processPredictions);
+                // processPredictions++;
+                // progressPredictions.update(processPredictions);
 
                 return predictions;
             });
 
             const allPredictions = await Promise.all(predictionsPromises);
-            progressPredictions.stop();
+            // progressPredictions.stop();
 
-            progressRender.start();
-            progressFrames.start();
+            // progressRender.start();
+            // progressFrames.start();
             const finalImagesPromises = allPredictions.map(
                 async (prediction, index) => {
                     const firstPrediction = prediction[0];
@@ -228,8 +208,8 @@ const renderVideo = async (req, res) => {
                         const predictedClass = firstPrediction.class[0];
                         const [xRatio, yRatio] = firstPrediction.ratio;
 
-                        processRender++;
-                        progressRender.update(processRender);
+                        // processRender++;
+                        // progressRender.update(processRender);
 
                         return renderBox(
                             handleImage,
@@ -244,8 +224,8 @@ const renderVideo = async (req, res) => {
                                 fs.writeFileSync(outputPath, buffer);
                                 tempImage = buffer.toString("base64");
 
-                                processFrames++;
-                                progressFrames.update(processFrames);
+                                // processFrames++;
+                                // progressFrames.update(processFrames);
 
                                 return `data:image/jpeg;base64, ${tempImage}`;
                             })
@@ -259,8 +239,8 @@ const renderVideo = async (req, res) => {
             );
 
             const finalImages = await Promise.all(finalImagesPromises);
-            progressRender.stop();
-            progressFrames.stop();
+            // progressRender.stop();
+            // progressFrames.stop();
 
             const outputVideoPath = path.join(
                 __dirname,

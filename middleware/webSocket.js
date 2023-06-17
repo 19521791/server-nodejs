@@ -1,4 +1,4 @@
-const WebSocket = require('websocket');
+const WebSocket = require('ws');
 
 const clients = new Set();
 
