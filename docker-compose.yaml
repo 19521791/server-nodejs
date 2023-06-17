@@ -3,9 +3,10 @@ services:
   my-container:
     image: server
     ports:
-      - 3500:8080
+      - 8080:3500
     volumes:
       - /home/long1100/temp:/usr/src/app
+      
     depends_on:
       - mongodb
   mongodb:
@@ -13,6 +14,6 @@ services:
     ports: 
       - 27017:27017
     volumes:
-      - ~/Database:/data/db
-volumes:
-  ~/Database
+      - /home/long1100/Database:/data/db
+    env_file:
+      - .env

@@ -3,5 +3,5 @@ const connectDB = require("./config/db.config");
 
 const { PORT } = process.env;
 
-// connectDB();
+connectDB();
 app.listen(PORT, () => console.log(`App are listening at ${PORT}`));

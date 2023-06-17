@@ -256,7 +256,7 @@ const renderVideo = async (req, res) => {
             console.error("Error in here:", err);
         }
 
-        res.send("My name is Long");
+        res.send("Long dep trai");
     } catch (err) {
         console.log(err);
     }
