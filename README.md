@@ -11,18 +11,15 @@
   </thead>
   <tbody>
     <tr>
-      <th scope="row"></th>
       <td>config</td>
       <td>config database, http request and view engine</td>
     </tr>
     <tr>
-      <th scope="row"></th>
       <td>Jacob</td>
       <td>Thornton</td>
       <td>@fat</td>
     </tr>
     <tr>
-      <th scope="row"></th>
       <td colspan="2">Larry the Bird</td>
       <td>@twitter</td>
     </tr>
