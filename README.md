@@ -49,11 +49,14 @@
   <ul>
     <li>docker build -t server .</li>
     <li>
-      change this path: <b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just cloned.
+      change this path: <b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just clone,
       because in window can't run canvas and sharp library at the same time. 
     </li>
     <li>remove volumes section in image mongo if you don't need it</li>
     <li>docker-compose up</li>
   </ul>
   <li>Linux or Mac</li>
+  <ul>
+    <li>npm install</li>
+  </ul>
 </ul>
