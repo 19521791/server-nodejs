@@ -43,7 +43,7 @@
 </table>
 
 <p>Setup guide</p>
-<p>Clone: ```git clone https://github.com/19521791/server-nodejs.git```</p>
+<p>Clone: `git clone https://github.com/19521791/server-nodejs.git`</p>
 <span>OS</span>
 <ul>
   <li>Window: </li>
