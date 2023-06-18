@@ -15,12 +15,11 @@
       <td>config database, http request and view engine</td>
     </tr>
     <tr>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
+      <td>controller</td>
+      <td></td>
     </tr>
     <tr>
-      <td colspan="2">Larry the Bird</td>
+      <td>Larry the Bird</td>
       <td>@twitter</td>
     </tr>
   </tbody>
