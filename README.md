@@ -43,9 +43,13 @@
 </table>
 
 <p>Setup guide</p>
-<p>Clone: </p>`git clone https://github.com/19521791/server-nodejs.git`
 <span>OS</span>
 <ul>
-  <li>Window: </li>
+  <li>Window: docker build -t server .</li>
+  <ul>
+    <li>
+      change this path: <b>/home/long1100/temp</b> in volumes to absolute path to the cloned folder
+    </li>
+  </ul>
   <li>Linux or Mac</li>
 </ul>
