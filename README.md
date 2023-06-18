@@ -12,7 +12,7 @@
   <tbody>
     <tr>
       <td>config</td>
-      <td>config database, http request and view engine</td>
+      <td>Config database, http request and view engine</td>
     </tr>
     <tr>
       <td>controller</td>
@@ -24,7 +24,19 @@
     </tr>
     <tr>
       <td>model</td>
-      <td>schema</td>
+      <td>Schema</td>
+    </tr>
+    <tr>
+      <td>route</td>
+      <td>Routing and define endpoint</td>
+    </tr>
+    <tr>
+      <td>service</td>
+      <td>All deep learning logic go here</td>
+    </tr>
+    <tr>
+      <td>views</td>
+      <td>Create temporary UI</td>
     </tr>
   </tbody>
 </table>
