@@ -16,11 +16,15 @@
     </tr>
     <tr>
       <td>controller</td>
-      <td></td>
+      <td>Handle get and post mehthod</td>
     </tr>
     <tr>
-      <td>Larry the Bird</td>
-      <td>@twitter</td>
+      <td>middleware</td>
+      <td>Express middleware</td>
+    </tr>
+    <tr>
+      <td>model</td>
+      <td>schema</td>
     </tr>
   </tbody>
 </table>
