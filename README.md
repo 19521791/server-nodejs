@@ -1,6 +1,7 @@
 <h1 align="center">HOW TO IMPLEMENT A DEEPLEARNING MODEL INTO SERVER</h1>
 
 <h2 align="center">DETECTING NINE DASH LINE IN IMAGES OR VIDEO</h2>
+
 <p>Code structure</p>
 <table>
   <thead>
@@ -40,3 +41,11 @@
     </tr>
   </tbody>
 </table>
+
+<p>Setup guide</p>
+<p>Clone: ```git clone https://github.com/19521791/server-nodejs.git```</p>
+<span>OS</span>
+<ul>
+  <li>Window: </li>
+  <li>Linux or Mac</li>
+</ul>
