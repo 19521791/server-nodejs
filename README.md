@@ -50,10 +50,11 @@
     <li>docker build -t server .</li>
     <li>
       change this path: <b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just clone,
-      because in window can't run canvas and sharp library at the same time. 
+      because code in container and code in cloned folder are not the same so you need to mount it into container. When you change your code, code in container auto change
     </li>
     <li>remove volumes section in image mongo if you don't need it</li>
     <li>docker-compose up</li>
+    <li>Need to dockerize because canvas and sharp library can't run at the same time in window</li>
   </ul>
   <li>Linux or Mac</li>
   <ul>
