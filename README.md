@@ -2,8 +2,8 @@
 
 <h2 align="center">DETECTING NINE DASH LINE IN IMAGES OR VIDEO</h2>
 
-<img src="temporaryUI.png" width=500 height=500 align="left">
-<img src="result.png" width=500 height=500 align="right">
+<img src="temporaryUI.png" alt="Maybe here is a picture">
+<img src="result.png" alt="Maybe here is a picture">
 
 <p>Code structure</p>
 <table>
