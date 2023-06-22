@@ -15,3 +15,16 @@ rabbit:
 # Docker build command
 image:
 	docker build -t server .
+
+# npm command
+compare:
+	npm run test:compare
+
+extract:
+	npm run test:extract
+
+deleteEP:
+	npm run test:deleteEP
+
+deleteAF:
+	npm run test:deleteAF
