@@ -9,6 +9,6 @@ router.get("/video", (req, res) => {
 
 router.post("/detect-video", upload, uploadVideo);
 
-router.get("/render-video/:filename", renderVideo);
+router.get("/video/:filename", renderVideo);
 
 module.exports = router;

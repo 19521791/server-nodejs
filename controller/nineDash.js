@@ -132,7 +132,7 @@ const uploadVideo = async (req, res) => {
         res.status(400).send("No video uploaded!");
     } else {
         console.log("Success upload video");
-        const videoUrl = "/render-video/" + req.file.filename;
+        const videoUrl = "/video/" + req.file.filename;
         console.timeEnd('uploadVideo');
         res.redirect(videoUrl);
     }
@@ -140,20 +140,15 @@ const uploadVideo = async (req, res) => {
 
 const renderVideo = async (req, res) => {
     console.time('renderVideo');
+    const io = req.app.get('io');
     const model = global.modeler;
-
-    // let processPredictions = 0;
-    // let processRender = 0;
-    // let processFrames = 0;
-
     try {
         const videoPath = path.join( __dirname, "..", "uploadVideos", req.params.filename,);
         const destPath = path.join(__dirname, "..", "FRAMES");
         const outputPredictFrame = path.join(__dirname, "..", "DETECTS");
 
         await extractFrame(videoPath, destPath);
-       
-        
+ 
         const framePaths = await new Promise((resolve, reject) => {
             console.time('getPath');
             fs.readdir(destPath, (err, files) => {
@@ -168,6 +163,8 @@ const renderVideo = async (req, res) => {
             });
             console.timeEnd('getPath');
         });
+
+        let progress = 0;
         
         const frameNames = fs.readdirSync(destPath);
 
@@ -178,22 +175,20 @@ const renderVideo = async (req, res) => {
         const predictionsPromises = [];
 
         for (let i = 0; i < framePaths.length; i += batchSize) {
-        const batch = framePaths.slice(i, i + batchSize);
-        batches.push(batch);
+            const batch = framePaths.slice(i, i + batchSize);
+            batches.push(batch);
 
-        const predictionsPromise = Promise.all(batch.map(file => detectImage(file, model)));
-        predictionsPromises.push(predictionsPromise);
+            const predictionsPromise = Promise.all(batch.map(file => detectImage(file, model)));
+            predictionsPromises.push(predictionsPromise);
         }
 
         const allPredictions = [];
 
         for (const predictionsPromise of predictionsPromises) {
-        const predictions = await predictionsPromise;
-        allPredictions.push(...predictions);
+            const predictions = await predictionsPromise;
+            allPredictions.push(...predictions);
         }
-
         console.timeEnd('predict');
-
 
         console.time('finalPredict');
         const finalImagesPromises = allPredictions.map(
@@ -208,42 +203,37 @@ const renderVideo = async (req, res) => {
                     const score = firstPrediction.score[0];
                     const predictedClass = firstPrediction.class[0];
                     const [xRatio, yRatio] = firstPrediction.ratio;
-                    return renderBox(
-                        handleImage,
-                        classThreshold,
-                        [xmin, ymin, width, height],
-                        [score],
-                        [predictedClass],
-                        [xRatio, yRatio],
-                    )
-                        .then((canvas) => {
-                            const buffer = canvas.toBuffer("image/png");
-                            fs.writeFileSync(outputPath, buffer);
-                            tempImage = buffer.toString("base64");
-                            return `data:image/jpeg;base64, ${tempImage}`;
-                        })
-                        .catch((error) => {
-                            console.log("Error: ", error);
-                        });
+
+                    return renderBox( handleImage, classThreshold, [xmin, ymin, width, height], [score], [predictedClass], [xRatio, yRatio],)
+                    .then((canvas) => {
+                        const buffer = canvas.toBuffer("image/png");
+                        fs.writeFileSync(outputPath, buffer);
+                        tempImage = buffer.toString("base64");
+                        io.emit('frame', `data:image/jpeg;base64, ${tempImage}`);
+                        return `data:image/jpeg;base64, ${tempImage}`;
+                    })
+                    .catch((error) => {
+                        console.log("Error: ", error);
+                    });
                 } else {
                     return null;
                 }
             },
         );
-
+       
         const finalImages = await Promise.all(finalImagesPromises);
         console.timeEnd('finalPredict');
-        // progressRender.stop();
-        // progressFrames.stop();
-
+        
         const outputVideoPath = path.join( __dirname, "..", "outputVideos", req.params.filename,);
 
         const fps = 30;
         console.time('generate');
         await generateVideo(fps, outputPredictFrame, outputVideoPath);
         console.timeEnd('generate');
+        // const outputVideoPath = path.join( __dirname, "..", "outputVideos", '1687435027351_video3.mp4');
+        const video = fs.readFileSync(outputVideoPath);
         console.timeEnd('renderVideo');
-        res.send("Long dep trai");
+        res.render('displayVideo.ejs', { video: video});
     } catch (err) {
         console.log(err);
     }

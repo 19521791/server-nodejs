@@ -2,6 +2,8 @@ const app = require("./app");
 const { connectToRabbitMQ } = require("./config/rabbit-mq.config");
 const loadModel = require('./service/ninedash/loadModel');
 const tf = require('@tensorflow/tfjs-node');
+const http = require('http');
+const socketIO = require('socket.io');
 
 const { PORT } = process.env;
 
@@ -10,7 +12,22 @@ const { PORT } = process.env;
     const model = await loadModel();
     global.modeler = model;
     connectToRabbitMQ();
-    app.listen(PORT, () => console.log(`App are listening at ${PORT}`));
+
+    const server = http.createServer(app);
+    const io = socketIO(server);
+
+    app.set('io', io);
+    io.on('connection', (socket) => {
+        console.log('A client connected');
+
+        // You can add your socket event handlers here
+
+        socket.on('disconnect', () => {
+            console.log('A client disconnected');
+        });
+    });
+
+    server.listen(PORT, () => console.log(`App are listening at ${PORT}`));
 })();
 
 

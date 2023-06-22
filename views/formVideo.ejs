@@ -1,17 +1,73 @@
 <%- include('partials/header') %>
     <style>
-        .main-margin {
-        margin-left:10%;
-        margin-top:4%;
-        }
-
-        .custom-label {
-        width: 14%;
-        display: inline-block;
+          #main-div {
+            max-width: 400px;
+            margin: 40px auto 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .form-group {
-        padding: 1%
+            margin-bottom: 20px;
+        }
+
+        .custom-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        input[type="submit"],
+        input[type="reset"] {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4caf50;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover,
+        input[type="reset"]:hover {
+            background-color: #45a049;
+        }
+
+        #btn_back {
+            display: block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: black;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #btn_back:hover {
+            color: yellow;
+        }
+
+        a{
+            text-decoration: none;
         }
     </style>
 </head>
@@ -22,8 +78,8 @@
           <label class='custom-label'> Select file to upload: </label>
           <input accept="video/mp4" type="file" name="video_uploaded">
         </div>
-        <div style="padding-left:15%">
-          <input type="submit" id='submit' value="Upload File" name="submit" onclick="return validateForm(event)">
+        <div class="btn-group">
+          <input type="submit" id='submit' value="Upload File" name="submit">
           <input class="btn_cancel btn_hover" type="reset" value="Cancel">
         </div>
       </form>
@@ -35,58 +91,5 @@
         <div id="progressBar"></div>
     </div>
     <p id="progressMessage"></p>
-    <script>
-        const socket = io("http://localhost:3500");
-        socket.on('progress', ({ message, progressPercentage }) => {
-            updateLoadingBar(message, progressPercentage);
-        });
-
-        function updateLoadingBar(message, progressPercentage) {
-            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
-            document.getElementById('progressMessage').innerText = message;
-        }
-
-        function onSubmit(e) {
-            e.preventDefault();
-            var customMessage = document.getElementById('message');
-            if(validateForm(customMessage)) {
-                uploadVideo(customMessage);
-            }
-        }
-
-        function validateForm(customMessage) {
-            const uploadedFile = document.getElementById('video-upload').elements[0].files[0];
-            if(!uploadedFile) {
-                customMessage.innerHTML = "Please select a video to upload";
-                return false;
-            }
-            const fileLimit = 104857600;
-            if(uploadedFile.size > fileLimit) {
-                customMessage.innerHTML = "Maximum video size allowed: 100MB";
-                return false;
-            }
-            return true;
-        }
-
-        // function uploadVideo(customMessage) {
-        //     document.getElementById("submit").disabled = true;
-        //     customMessage.innerHTML = 'uploading video..'
-        //     var formElement = document.getElementById("video-upload");
-        //     var request = new XMLHttpRequest();
-        //     request.open("POST", "/detect_video", true);
-        //     request.onload = onComplete;
-        //     request.upload.onprogress = fileUploadPercentage;
-        //     const data = new FormData(formElement);
-        //     request.send(data);
-        // }
-
-        function fileUploadPercentage(e) {
-            if (e.lengthComputable) {
-                var customMessage = document.getElementById('message');
-                var percentage = (e.loaded / e.total) * 100;
-                customMessage.innerHTML = 'Uploading Video: ' + percentage + ' %';
-            }
-        }
-
-    </script>
+   
 <%- include('partials/footer') %>
