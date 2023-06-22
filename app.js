@@ -7,8 +7,10 @@ const morgan = require("morgan");
 const notfound = require("./route/404");
 const viewEngine = require("./config/viewEngine");
 const video = require("./route/nineDashVideo");
+const cors = require('cors');
 
 app = express();
+app.use(cors());
 app.use(viewEngine);
 app.use(morgan("dev"));
 app.use(parseReq);

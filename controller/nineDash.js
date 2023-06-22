@@ -127,139 +127,113 @@ const getImage = async (req, res) => {
   
 
 const uploadVideo = async (req, res) => {
+    console.time('uploadVideo');
     if (!req.file) {
         res.status(400).send("No video uploaded!");
     } else {
         console.log("Success upload video");
-        const videoUrl = "/render-video/" + req.file.filename;
+        const videoUrl = "/video/" + req.file.filename;
+        console.timeEnd('uploadVideo');
         res.redirect(videoUrl);
     }
 };
 
 const renderVideo = async (req, res) => {
-    const model = await loadModel();
-
-    // let processPredictions = 0;
-    // let processRender = 0;
-    // let processFrames = 0;
-
+    console.time('renderVideo');
+    const io = req.app.get('io');
+    const model = global.modeler;
     try {
-        const videoPath = path.join(
-            __dirname,
-            "..",
-            "uploadVideos",
-            req.params.filename,
-        );
+        const videoPath = path.join( __dirname, "..", "uploadVideos", req.params.filename,);
         const destPath = path.join(__dirname, "..", "FRAMES");
         const outputPredictFrame = path.join(__dirname, "..", "DETECTS");
 
         await extractFrame(videoPath, destPath);
-
-        try {
-            const framePaths = await new Promise((resolve, reject) => {
-                fs.readdir(destPath, (err, files) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    const paths = files.map((file) =>
-                        path.join(destPath, file),
-                    );
-                    resolve(paths);
-                });
+ 
+        const framePaths = await new Promise((resolve, reject) => {
+            console.time('getPath');
+            fs.readdir(destPath, (err, files) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                const paths = files.map((file) =>
+                    path.join(destPath, file),
+                );
+                resolve(paths);
             });
-            // const totalFrames = framePaths.length;
-            // const progressPredictions = predictions(totalFrames);
-            // const progressRender = render(totalFrames);
-            // const progressFrames = frames(totalFrames);
+            console.timeEnd('getPath');
+        });
 
-            const frameNames = fs.readdirSync(destPath);
+        let progress = 0;
+        
+        const frameNames = fs.readdirSync(destPath);
 
-            // progressPredictions.start();
-            const predictionsPromises = framePaths.map(async (file) => {
-                const predictions = await detectImage(file, model);
+        console.time('predict');
 
-                // processPredictions++;
-                // progressPredictions.update(processPredictions);
+        const batchSize = 10; 
+        const batches = [];
+        const predictionsPromises = [];
 
-                return predictions;
-            });
+        for (let i = 0; i < framePaths.length; i += batchSize) {
+            const batch = framePaths.slice(i, i + batchSize);
+            batches.push(batch);
 
-            const allPredictions = await Promise.all(predictionsPromises);
-            // progressPredictions.stop();
-
-            // progressRender.start();
-            // progressFrames.start();
-            const finalImagesPromises = allPredictions.map(
-                async (prediction, index) => {
-                    const firstPrediction = prediction[0];
-                    const handleImage = firstPrediction
-                        ? firstPrediction.buffer
-                        : null;
-
-                    const outputPath = path.join(
-                        __dirname,
-                        "..",
-                        "DETECTS",
-                        frameNames[index],
-                    );
-
-                    if (firstPrediction) {
-                        const [xmin, ymin, width, height] =
-                            firstPrediction.bbox;
-                        const score = firstPrediction.score[0];
-                        const predictedClass = firstPrediction.class[0];
-                        const [xRatio, yRatio] = firstPrediction.ratio;
-
-                        // processRender++;
-                        // progressRender.update(processRender);
-
-                        return renderBox(
-                            handleImage,
-                            classThreshold,
-                            [xmin, ymin, width, height],
-                            [score],
-                            [predictedClass],
-                            [xRatio, yRatio],
-                        )
-                            .then((canvas) => {
-                                const buffer = canvas.toBuffer("image/png");
-                                fs.writeFileSync(outputPath, buffer);
-                                tempImage = buffer.toString("base64");
-
-                                // processFrames++;
-                                // progressFrames.update(processFrames);
-
-                                return `data:image/jpeg;base64, ${tempImage}`;
-                            })
-                            .catch((error) => {
-                                console.log("Error: ", error);
-                            });
-                    } else {
-                        return null;
-                    }
-                },
-            );
-
-            const finalImages = await Promise.all(finalImagesPromises);
-            // progressRender.stop();
-            // progressFrames.stop();
-
-            const outputVideoPath = path.join(
-                __dirname,
-                "..",
-                "outputVideos",
-                req.params.filename,
-            );
-
-            const fps = 30;
-
-            await generateVideo(fps, outputPredictFrame, outputVideoPath);
-        } catch (err) {
-            console.error("Error in here:", err);
+            const predictionsPromise = Promise.all(batch.map(file => detectImage(file, model)));
+            predictionsPromises.push(predictionsPromise);
         }
 
-        res.send("Long dep trai");
+        const allPredictions = [];
+
+        for (const predictionsPromise of predictionsPromises) {
+            const predictions = await predictionsPromise;
+            allPredictions.push(...predictions);
+        }
+        console.timeEnd('predict');
+
+        console.time('finalPredict');
+        const finalImagesPromises = allPredictions.map(
+            async (prediction, index) => {
+                const firstPrediction = prediction[0];
+                const handleImage = firstPrediction  ? firstPrediction.buffer : null;
+
+                const outputPath = path.join( __dirname,"..", "DETECTS",frameNames[index],);
+
+                if (firstPrediction) {
+                    const [xmin, ymin, width, height] = firstPrediction.bbox;
+                    const score = firstPrediction.score[0];
+                    const predictedClass = firstPrediction.class[0];
+                    const [xRatio, yRatio] = firstPrediction.ratio;
+
+                    return renderBox( handleImage, classThreshold, [xmin, ymin, width, height], [score], [predictedClass], [xRatio, yRatio],)
+                    .then((canvas) => {
+                        const buffer = canvas.toBuffer("image/png");
+                        fs.writeFileSync(outputPath, buffer);
+                        tempImage = buffer.toString("base64");
+                        io.emit('frame', `data:image/jpeg;base64, ${tempImage}`);
+                        return `data:image/jpeg;base64, ${tempImage}`;
+                    })
+                    .catch((error) => {
+                        console.log("Error: ", error);
+                    });
+                } else {
+                    return null;
+                }
+            },
+        );
+       
+        const finalImages = await Promise.all(finalImagesPromises);
+        console.timeEnd('finalPredict');
+        
+        const outputVideoPath = path.join( __dirname, "..", "outputVideos", req.params.filename,);
+
+        const fps = 30;
+        console.time('generate');
+        await generateVideo(fps, outputPredictFrame, outputVideoPath);
+        console.timeEnd('generate');
+        // const outputVideoPath = path.join( __dirname, "..", "outputVideos", '1687435027351_video3.mp4');
+        const video = fs.readFileSync(outputVideoPath);
+        console.timeEnd('renderVideo');
+        res.render('displayVideo.ejs', { video: video});
     } catch (err) {
         console.log(err);
     }
