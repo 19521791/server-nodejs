@@ -4,8 +4,7 @@ const renderBox = require("../service/ninedash/renderBox");
 const fs = require("fs");
 const extractFrame = require("../service/ninedash/extractFrame");
 const generateVideo = require("../service/ninedash/generateVideo");
-const { getRabbitMQConnection } = require("../config/rabbit-mq.config");
-// const { predictions, render, frames } = require("../middleware/progressBar");
+const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
 
 const classThreshold = 0.2;
 
@@ -15,34 +14,26 @@ const uploadImage = async (req, res) => {
         res.status(400).send("No files uploaded.");
     } else {
         console.log("Success upload image!");
-        let rabbitMQConnection;
         try {
             const rabbitMQConnection = getRabbitMQConnection();
 
             const fileNames = req.files.map((file) => file.filename);
 
             fileNames.forEach(async (filename) => {
-
-            if(rabbitMQConnection){
-                const channel = await rabbitMQConnection.createChannel();
-                await channel.assertQueue("imageQueue");
-                channel.sendToQueue("imageQueue", Buffer.from(JSON.stringify({ filename })));
-                await channel.close();
-            }
+                if(rabbitMQConnection){
+                    const channel = await rabbitMQConnection.createChannel();
+                    await channel.assertQueue("imageQueue");
+                    channel.sendToQueue("imageQueue", Buffer.from(JSON.stringify({ filename })));
+                    await channel.close();
+                }
            });
         } catch (err) {
             console.log(err);
             res.status(500).send("Error saving image names");
-        } finally{
-            if (rabbitMQConnection) {
-                await rabbitMQConnection.close();
-                console.log('Disconnected from RabbitMQ');
-            }
-        }
+        } 
         console.timeEnd('post');
         res.redirect(`/nine-dash`);
     }
-    // res.send('Long dep trai');
 };
 
 const getImage = async (req, res) => {
@@ -51,8 +42,10 @@ const getImage = async (req, res) => {
   
     try {
       const rabbitMQConnection = getRabbitMQConnection();
+      const startTime = new Date().getTime();
       const channel = await rabbitMQConnection.createChannel();
-  
+      await channel.assertQueue("imageQueue");
+
       const messages = [];
   
       while (true) {
@@ -63,6 +56,9 @@ const getImage = async (req, res) => {
         messages.push(JSON.parse(message.content.toString()));
         channel.ack(message);
       }
+      const endTime = new Date().getTime();
+      const connectionTime = endTime - startTime;
+      console.log(`Connection time: ${connectionTime}ms`);
   
       if (messages.length === 0) {
         console.log("No messages available in the queue.");
@@ -140,7 +136,6 @@ const uploadVideo = async (req, res) => {
 
 const renderVideo = async (req, res) => {
     console.time('renderVideo');
-    const io = req.app.get('io');
     const model = global.modeler;
     try {
         const videoPath = path.join( __dirname, "..", "uploadVideos", req.params.filename,);
@@ -209,7 +204,7 @@ const renderVideo = async (req, res) => {
                         const buffer = canvas.toBuffer("image/png");
                         fs.writeFileSync(outputPath, buffer);
                         tempImage = buffer.toString("base64");
-                        io.emit('frame', `data:image/jpeg;base64, ${tempImage}`);
+            
                         return `data:image/jpeg;base64, ${tempImage}`;
                     })
                     .catch((error) => {

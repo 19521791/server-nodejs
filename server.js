@@ -19,9 +19,6 @@ const { PORT } = process.env;
     app.set('io', io);
     io.on('connection', (socket) => {
         console.log('A client connected');
-
-        // You can add your socket event handlers here
-
         socket.on('disconnect', () => {
             console.log('A client disconnected');
         });
