@@ -1,39 +1,110 @@
 <%- include('partials/header.ejs')  %>
     <style>
-        #uploaded_img{ display: block; margin-left: auto; margin-right: auto;
-            width: 400px; margin-top: 2rem; margin-bottom: 1.5rem; height: 400px;
-            border-radius: 10px;
+        #uploaded_img{ display: block;
+      margin: 0 auto;
+      width: 400px;
+      height: 400px;
+      border-radius: 10px;
         }
 
-        #btn_back{ display: block; padding: 0.5rem; cursor: pointer; margin: 0 auto;
-            background-color: black; color: white; border: none; border-radius: 5px; width: 70px;
+        #btn_back{ display: block;
+      padding: 0.5rem;
+      cursor: pointer;
+      margin: 0 auto;
+      background-color: black;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      width: 70px;
         }
 
         a{
             text-decoration: none;
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
         }
         .container{
             display: flex;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      background-color: #ffffff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
         }
+        h1 {
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    .img-row {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .img-item {
+      flex-basis: calc(25% - 20px);
+      margin-bottom: 20px;
+    }
+
+    .toggle-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 16px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dark-mode {
+      background-color: #222222;
+      color: #ffffff;
+    }
+
+    .dark-mode .toggle-button {
+      background-color: #ffffff;
+      color: #000000;
+    }
+
     </style>
     <title>NINEDASH</title>
 </head>
-<body>
+<body class="dark-mode">
+    <button id="toggleButton" class="toggle-button">Light</button>
+
     <% if (predictions.length === 0) { %>
         <h1>No objects detected in the uploaded images</h1>
     <% } else { %>
         <h1 class="text-center mt-4">Predictions for Uploaded Images</h1>
-        <% for(let i = 0; i < predictions.length; i++) {%>
-            <div class="container">
-                <% if(finalImages[i]) { %>
-                    <img class="block mx-auto w-96 mb-6 mt-8 h-96 rounded-lg" src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img" >
-                <% } else { %>
-                    <p>No object detected in this image.</p>
-                <% } %>
-            </div>
-        <% } %>
+        <div class="img-row">
+            <% for(let i = 0; i < predictions.length; i++) {%>
+               <div class="img-item">
+                <div class="container">
+                    <% if(finalImages[i]) { %>
+                        <img src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img" >
+                    <% } else { %>
+                        <p>No object detected in this image.</p>
+                    <% } %>
+                </div>
+               </div>
+            <% } %>
+        </div>
     <% } %>
     <a href="/">
         <button id="btn_back" onmouseover="mouseover()" onmouseout="mouseout()">Back</button>
@@ -46,6 +117,25 @@
 
     function mouseout() {
         document.getElementById('btn_back').style.color = 'white';
+    }
+
+    const toggleButton = document.getElementById('toggleButton');
+    const body = document.querySelector('body');
+
+    toggleButton.addEventListener('click', function() {
+      body.classList.toggle('dark-mode');
+      if (body.classList.contains('dark-mode')) {
+        toggleButton.textContent = 'Light';
+        localStorage.setItem('darkMode', 'enabled'); 
+      } else {
+        toggleButton.textContent = 'Dark';
+        localStorage.setItem('darkMode', 'disabled'); 
+      }
+    });
+
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark-mode');
+      toggleButton.textContent = 'Light';
     }
 </script>
 <%- include('partials/footer.ejs') %>

@@ -42,7 +42,6 @@ const getImage = async (req, res) => {
   
     try {
       const rabbitMQConnection = getRabbitMQConnection();
-      const startTime = new Date().getTime();
       const channel = await rabbitMQConnection.createChannel();
       await channel.assertQueue("imageQueue");
 
@@ -57,9 +56,7 @@ const getImage = async (req, res) => {
         channel.ack(message);
       }
       const endTime = new Date().getTime();
-      const connectionTime = endTime - startTime;
-      console.log(`Connection time: ${connectionTime}ms`);
-  
+      
       if (messages.length === 0) {
         console.log("No messages available in the queue.");
         res.status(204).send("No images to process.");
