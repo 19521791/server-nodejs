@@ -46,21 +46,21 @@
 </table>
 
 <p>Setup guide</p>
-<span>OS</span>
+<p>Linux</p>
 <ul>
-  <li>Window</li>
   <ul>
-    <li>Run command: <b>docker build -t server .</b></li>
+    <li>npm install</li>
+  </ul>
+  <ul>
+    <li>Run command: <b>make image</b></li>
     <li>
       change this path: <b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just clone,
       because code in container and code in cloned folder are not the same so you need to mount it into container. When you change your code, code in container auto change
     </li>
     <li>remove volumes section in image mongo if you don't need it</li>
-    <li>Run command: <b>docker-compose up</b></li>
-    <li>Need to dockerize because canvas and sharp library can't run at the same time in window</li>
+    <li>Run command: <b>make rabbit</b></li>
+    <li>Run command: <b>make container</b></li>
   </ul>
-  <li>Linux or Mac</li>
-  <ul>
-    <li>npm install</li>
-  </ul>
+  
+ 
 </ul>
