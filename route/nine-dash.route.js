@@ -1,4 +1,4 @@
-const { uploadImage, getImage } = require("../controller/nineDash");
+const { uploadImage, getImage } = require("../controller/nine-dash.controller");
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/storage");

@@ -1,83 +1,4 @@
 <style>
-    /* .title {
-        text-align: center;
-        font-size: 40px;
-        margin-bottom: 20px;
-        margin-top: 40px;
-    }
-
-    form {
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #f5f5f5;
-        border: 1px solid gray;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .upload_img {
-        margin-bottom: 20px;
-    }
-
-    .label_name {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: bold;
-    }
-
-    .btn_upload {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        transition: border-color 0.3s ease;
-    }
-
-    .btn_upload:hover {
-        border-color: #999;
-    }
-
-    .error {
-        color: red;
-        margin-top: 5px;
-        font-size: 14px;
-    }
-
-    .btn {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-    .btn_submit,
-    .btn_cancel {
-        padding: 10px 20px;
-        font-size: 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn_submit {
-        background-image: -webkit-linear-gradient(169deg, #5560ff 17%, #aa52a1 63%, #ff4343 100%);
-        color: #fff;
-        margin-right: 10px;
-        border: 10px;
-    }
-
-    .btn_cancel {
-        background-color: #ccc;
-        color: #333;
-    }
-
-    .btn_submit:hover,
-    .btn_cancel:hover {
-        background-color: #45a049;
-    } */
     * {
         padding: 0;
         margin: 0;
@@ -107,6 +28,11 @@
         flex-direction: column;
     }
 
+    .container h1 {
+    margin-top: 0; 
+    text-align: center;
+    }
+
     form {
         text-align: center;
     }
@@ -114,7 +40,7 @@
     .title {
         font-size: 54px;
         text-transform: uppercase;
-        margin-bottom: 20px;
+        margin-bottom: 80px;
     }
 
     .upload_img {
@@ -183,20 +109,25 @@
 </style>
 <main class="container">
     <h1 class="title">MY DETECTOR</h1>
-<form action="/detect" method="post" enctype="multipart/form-data" >
-    <div class="upload_img">
-        <label class="label_name">Select picture: </label>
-        <input class="btn_upload" type="file" name="image_uploaded" id="image_uploaded" accept="image/*" multiple>
-        <br>
-        <span class="error" id="file_error"></span>
-    </div>
-    <div class="btn">
-        <input class="btn_submit btn_hover" type="submit" value="Upload Image" name="btn" onclick="return validateForm(event)">
-        <input type="submit" value="Upload Video" class="btn_submit btn_hover" id="upload_video">
-        <input class="btn_cancel btn_hover" type="reset" value="Cancel">
-    </div>
-</form>
+    <form id="uploadForm" action="/detect" method="post" enctype="multipart/form-data" >
+        <div class="upload_img">
+            <label class="label_name">Select picture: </label>
+            <input class="btn_upload" type="file" name="image_uploaded" id="image_uploaded" accept="image/*" multiple>
+            <br>
+            <span class="error" id="file_error"></span>
+        </div>
+        <div class="btn">
+            <input class="btn_submit btn_hover" type="submit" value="Upload Image" name="btn">
+            <input type="submit" value="Upload Video" class="btn_submit btn_hover" id="upload_video">
+            <input class="btn_cancel btn_hover" type="reset" value="Cancel">
+        </div>
+    </form>
+    <div class="progress">
+        <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
 </main>
+
+<script src="/socket.io/socket.io.js"></script>
 <script>
     function validateForm(event) {
         let fileInput = document.getElementById('image_uploaded');
@@ -231,5 +162,13 @@
     uploadVideo.addEventListener('click', function(event) {
         event.preventDefault();
         window.location.href = '/video';
+    })
+
+    const socket = io.connect("http://localhost:8080/");
+    console.log('Connecting to server');
+    socket.on('process', ({process}) => {
+        const progressBar = document.getElementById('progress-bar');
+        progressBar.style.width = `${progress}%`;
+        progressBar.textContent = `${progress}%`;
     })
 </script>

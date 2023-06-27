@@ -3,13 +3,18 @@ const amqp = require('amqplib');
 let rabbitMQConnection = null;
 
 const connectToRabbitMQ = async () => {
-    try{
-        rabbitMQConnection = await amqp.connect("amqp://rabbitmq:5672");
+    try {
+        rabbitMQConnection = await amqp.connect({
+            hostname: 'rabbitmq',
+            port: 5672,
+            heartbeat: 60,
+        });
         console.log("Connected to RabbitMQ");
-    } catch(err){
+    } catch (err) {
         console.log("Error connecting to RabbitMQ:", err);
     }
 }
+
 
 const getRabbitMQConnection = () => {
     return rabbitMQConnection;

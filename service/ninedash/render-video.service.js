@@ -1,4 +1,4 @@
-const removeFiles = require("./removeFiles");
+const removeFiles = require("./remove-file.service");
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 const path = require("path");

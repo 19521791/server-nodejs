@@ -1,11 +1,11 @@
 const path = require("path");
-const detectImage = require("../service/ninedash/detect");
-const renderBox = require("../service/ninedash/renderBox");
+const detectImage = require("../service/ninedash/detect.service");
+const renderBox = require("../service/ninedash/render-img.service");
 const fs = require("fs");
-const extractFrame = require("../service/ninedash/extractFrame");
-const generateVideo = require("../service/ninedash/generateVideo");
-const { getRabbitMQConnection } = require("../config/rabbit-mq.config");
-// const { predictions, render, frames } = require("../middleware/progressBar");
+const extractFrame = require("../service/ninedash/extract-frame.service");
+const generateVideo = require("../service/ninedash/render-video.service");
+const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
+const { getMessageFromQueue } = require('../provider/ready-for-rabbit');
 
 const classThreshold = 0.2;
 
@@ -15,55 +15,35 @@ const uploadImage = async (req, res) => {
         res.status(400).send("No files uploaded.");
     } else {
         console.log("Success upload image!");
-        let rabbitMQConnection;
         try {
             const rabbitMQConnection = getRabbitMQConnection();
 
             const fileNames = req.files.map((file) => file.filename);
 
             fileNames.forEach(async (filename) => {
-
-            if(rabbitMQConnection){
-                const channel = await rabbitMQConnection.createChannel();
-                await channel.assertQueue("imageQueue");
-                channel.sendToQueue("imageQueue", Buffer.from(JSON.stringify({ filename })));
-                await channel.close();
-            }
+                if(rabbitMQConnection){
+                    const channel = await rabbitMQConnection.createChannel();
+                    await channel.assertQueue("imageQueue");
+                    channel.sendToQueue("imageQueue", Buffer.from(JSON.stringify({ filename })));
+                    await channel.close();
+                }
            });
         } catch (err) {
             console.log(err);
             res.status(500).send("Error saving image names");
-        } finally{
-            if (rabbitMQConnection) {
-                await rabbitMQConnection.close();
-                console.log('Disconnected from RabbitMQ');
-            }
-        }
+        } 
         console.timeEnd('post');
         res.redirect(`/nine-dash`);
     }
-    // res.send('Long dep trai');
 };
 
 const getImage = async (req, res) => {
     console.time('get');
     const model = global.modeler;
-  
+    const io = req.app.get('io');
     try {
-      const rabbitMQConnection = getRabbitMQConnection();
-      const channel = await rabbitMQConnection.createChannel();
-  
-      const messages = [];
-  
-      while (true) {
-        const message = await channel.get("imageQueue");
-        if (!message) {
-          break; 
-        }
-        messages.push(JSON.parse(message.content.toString()));
-        channel.ack(message);
-      }
-  
+      const messages = await getMessageFromQueue("imageQueue");
+      let process = messages.length;
       if (messages.length === 0) {
         console.log("No messages available in the queue.");
         res.status(204).send("No images to process.");
@@ -77,17 +57,14 @@ const getImage = async (req, res) => {
           const imagePath = path.join(__dirname, "..", "uploads", filename);
   
           const predictions = await detectImage(imagePath, model);
+
+          const handleImage = fs.readFileSync(imagePath);
   
-          const firstPrediction = predictions[0];
-          const handleImage = firstPrediction ? firstPrediction.buffer : null;
-  
-          const outputPath = path.join(__dirname, "..", "outputs", filename);
-  
-          if (firstPrediction) {
-            const [xmin, ymin, width, height] = firstPrediction.bbox;
-            const score = firstPrediction.score[0];
-            const predictedClass = firstPrediction.class[0];
-            const [xRatio, yRatio] = firstPrediction.ratio;
+          if (predictions) {
+            const [xmin, ymin, width, height] = predictions.bbox;
+            const score = predictions.score;
+            const predictedClass = predictions.class;
+            const [xRatio, yRatio] = predictions.ratio;
   
             console.log("Coordinate bboxes: ", xmin, ymin, width, height);
             console.log("Confident: ", score);
@@ -103,14 +80,20 @@ const getImage = async (req, res) => {
             );
   
             const buffer = canvas.toBuffer("image/png");
-            fs.writeFileSync(outputPath, buffer);
+            fs.writeFileSync(imagePath, buffer);
             const tempImage = buffer.toString("base64");
-  
             finalImages.push(`data:image/jpeg;base64, ${tempImage}`);
+            // if(io){
+            //     process --;
+            //     console.log('IO is working');
+            // io.emit('process', {process: 100});
+            // } else{
+            //     console.log('IO is not working');
+            // }
           } else {
             finalImages.push(null);
           }
-  
+          
           allPredictions.push(predictions);
         }
         console.timeEnd('get');
@@ -140,7 +123,6 @@ const uploadVideo = async (req, res) => {
 
 const renderVideo = async (req, res) => {
     console.time('renderVideo');
-    const io = req.app.get('io');
     const model = global.modeler;
     try {
         const videoPath = path.join( __dirname, "..", "uploadVideos", req.params.filename,);
@@ -209,7 +191,7 @@ const renderVideo = async (req, res) => {
                         const buffer = canvas.toBuffer("image/png");
                         fs.writeFileSync(outputPath, buffer);
                         tempImage = buffer.toString("base64");
-                        io.emit('frame', `data:image/jpeg;base64, ${tempImage}`);
+            
                         return `data:image/jpeg;base64, ${tempImage}`;
                     })
                     .catch((error) => {

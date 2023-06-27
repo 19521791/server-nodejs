@@ -1,6 +1,6 @@
 const app = require("./app");
 const { connectToRabbitMQ } = require("./config/rabbit-mq.config");
-const loadModel = require('./service/ninedash/loadModel');
+const loadModel = require('./service/ninedash/load-model.service');
 const tf = require('@tensorflow/tfjs-node');
 const http = require('http');
 const socketIO = require('socket.io');
@@ -19,9 +19,6 @@ const { PORT } = process.env;
     app.set('io', io);
     io.on('connection', (socket) => {
         console.log('A client connected');
-
-        // You can add your socket event handlers here
-
         socket.on('disconnect', () => {
             console.log('A client disconnected');
         });

@@ -1,12 +1,12 @@
 require("dotenv").config();
 const express = require("express");
-const parseReq = require("./config/parseRequest");
-const routerhome = require("./route/home");
-const routeNineDash = require("./route/nineDash");
+const parseReq = require("./config/request.config");
+const routerhome = require("./route/home.route");
+const routeNineDash = require("./route/nine-dash.route");
 const morgan = require("morgan");
 const notfound = require("./route/404");
-const viewEngine = require("./config/viewEngine");
-const video = require("./route/nineDashVideo");
+const viewEngine = require("./config/engine.config");
+const video = require("./route/nine-dash-video.route");
 const cors = require('cors');
 
 app = express();

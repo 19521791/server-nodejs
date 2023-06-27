@@ -3,6 +3,7 @@ const tf = require("@tensorflow/tfjs-node");
 const { loadImage } = require("canvas");
 
 const preprocess = async (source, modelWidth, modelHeight) => {
+    console.time('preprocess');
     let xRatio = 1,
         yRatio = 1;
     const sharpImg = await sharp(source)
@@ -34,6 +35,7 @@ const preprocess = async (source, modelWidth, modelHeight) => {
             .div(255.0)
             .expandDims(0);
     });
+    console.timeEnd('preprocess');
     return [input, xRatio, yRatio];
 };
 
