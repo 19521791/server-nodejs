@@ -1,6 +1,6 @@
 const app = require("./app");
 const { connectToRabbitMQ } = require("./config/rabbit-mq.config");
-const loadModel = require('./service/ninedash/loadModel');
+const loadModel = require('./service/ninedash/load-model.service');
 const tf = require('@tensorflow/tfjs-node');
 const http = require('http');
 const socketIO = require('socket.io');

@@ -11,6 +11,7 @@ const renderBoxes = (
     classes_data,
     ratios,
 ) => {
+    console.time('draw');
     const imageBuffer = Buffer.from(handleImage);
     return sharp(imageBuffer)
         .toBuffer()
@@ -73,6 +74,7 @@ const renderBoxes = (
                     );
                 }
             }
+            console.timeEnd('draw');
             return canvas;
         });
 };

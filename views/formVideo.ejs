@@ -76,10 +76,12 @@
       <form method="post" action="/detect-video" enctype="multipart/form-data" name='videoUpload' id='video-upload' >
         <div class='form-group'>
           <label class='custom-label'> Select file to upload: </label>
-          <input accept="video/mp4" type="file" name="video_uploaded">
+          <input accept="video/mp4" type="file" name="video_uploaded" id="video_uploaded">
+          <br>
+          <span class="error" id="file_error"></span>
         </div>
         <div class="btn-group">
-          <input type="submit" id='submit' value="Upload File" name="submit">
+          <input type="submit" id='submit' value="Upload File" name="submit" onclick="return validateForm(event)">
           <input class="btn_cancel btn_hover" type="reset" value="Cancel">
         </div>
       </form>
@@ -91,5 +93,35 @@
         <div id="progressBar"></div>
     </div>
     <p id="progressMessage"></p>
+    <script>
+        function validateForm(event) {
+        let fileInput = document.getElementById('video_uploaded');
+        let file = fileInput.files[0];
+        let fileError = document.getElementById('file_error');
+
+        if(!file){
+            fileError.textContent = "Please select a video to upload.";
+            fileError.style.display = "inline-block";
+            fileError.style.marginTop = "0.5rem";
+            fileError.style.color = "red";
+            event.preventDefault();
+            return false;
+        }
+
+        let fileType = file.type;
+        if(!fileType.startsWith('video/')){
+            fileError.textContent = "Invalid file type. Please upload a video.";
+            fileError.style.display = "inline-block";
+            fileError.style.marginTop = "0.5rem";
+            fileError.style.color = "red";
+            event.preventDefault();
+            return false;
+        }
+
+        fileError.textContent = "";
+        fileError.style.display = "none";
+        return true;
+    }
+    </script>
    
 <%- include('partials/footer') %>

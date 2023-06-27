@@ -5,7 +5,7 @@ services:
     ports:
       - 8080:3500
     volumes:
-      - /home/long1100/temp:/usr/src/app
+      - /home/long1100/server:/usr/src/app
     depends_on:
       - rabbitmq
 

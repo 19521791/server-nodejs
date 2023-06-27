@@ -109,7 +109,7 @@
 </style>
 <main class="container">
     <h1 class="title">MY DETECTOR</h1>
-    <form action="/detect" method="post" enctype="multipart/form-data" >
+    <form id="uploadForm" action="/detect" method="post" enctype="multipart/form-data" >
         <div class="upload_img">
             <label class="label_name">Select picture: </label>
             <input class="btn_upload" type="file" name="image_uploaded" id="image_uploaded" accept="image/*" multiple>
@@ -117,12 +117,17 @@
             <span class="error" id="file_error"></span>
         </div>
         <div class="btn">
-            <input class="btn_submit btn_hover" type="submit" value="Upload Image" name="btn" onclick="return validateForm(event)">
+            <input class="btn_submit btn_hover" type="submit" value="Upload Image" name="btn">
             <input type="submit" value="Upload Video" class="btn_submit btn_hover" id="upload_video">
             <input class="btn_cancel btn_hover" type="reset" value="Cancel">
         </div>
     </form>
-    </main>
+    <div class="progress">
+        <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
 <script>
     function validateForm(event) {
         let fileInput = document.getElementById('image_uploaded');
@@ -157,5 +162,13 @@
     uploadVideo.addEventListener('click', function(event) {
         event.preventDefault();
         window.location.href = '/video';
+    })
+
+    const socket = io.connect("http://localhost:8080/");
+    console.log('Connecting to server');
+    socket.on('process', ({process}) => {
+        const progressBar = document.getElementById('progress-bar');
+        progressBar.style.width = `${progress}%`;
+        progressBar.textContent = `${progress}%`;
     })
 </script>

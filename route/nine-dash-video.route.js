@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/storageForVideo");
-const { uploadVideo, renderVideo } = require("../controller/nineDash");
+const upload = require("../middleware/storage-video");
+const { uploadVideo, renderVideo } = require("../controller/nine-dash.controller");
 
 router.get("/video", (req, res) => {
     res.render("formVideo.ejs");

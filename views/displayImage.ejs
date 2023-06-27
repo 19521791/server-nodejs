@@ -1,86 +1,83 @@
 <%- include('partials/header.ejs')  %>
     <style>
-        #uploaded_img{ display: block;
-      margin: 0 auto;
-      width: 400px;
-      height: 400px;
-      border-radius: 10px;
+        #uploaded_img{ 
+          display: block;
+          margin: 0 auto;
+          width: 400px;
+          height: 400px;
+          border-radius: 10px;
         }
 
-        #btn_back{ display: block;
-      padding: 0.5rem;
-      cursor: pointer;
-      margin: 0 auto;
-      background-color: black;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      width: 70px;
+        #btn_back{ 
+          display: block;
+          padding: 0.5rem;
+          cursor: pointer;
+          margin: 0 auto;
+          background-color: black;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          width: 70px;
         }
 
         a{
-            text-decoration: none;
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
+          text-decoration: none;
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
         }
         .container{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      background-color: #ffffff;
-      margin-bottom: 20px;
-      padding: 20px;
-      border-radius: 10px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          background-color: #ffffff;
+          padding: 20px;
+          border-radius: 10px;
         }
         h1 {
-      text-align: center;
-      margin-top: 20px;
-      margin-bottom: 10px;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
+          text-align: center;
+          margin-top: 10px;
+          margin-bottom: 20px;
+        }
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background-color: #f9f9f9;
+        }
+        .img-row {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 20px;
+        }
 
-    .img-row {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
+        .toggle-button {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background-color: #000000;
+          color: #ffffff;
+          border: none;
+          border-radius: 5px;
+          padding: 8px 16px;
+          cursor: pointer;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-    .img-item {
-      flex-basis: calc(25% - 20px);
-      margin-bottom: 20px;
-    }
+        .dark-mode {
+          background-color: #222222;
+          color: #ffffff;
+        }
 
-    .toggle-button {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: #000000;
-      color: #ffffff;
-      border: none;
-      border-radius: 5px;
-      padding: 8px 16px;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .dark-mode {
-      background-color: #222222;
-      color: #ffffff;
-    }
-
-    .dark-mode .toggle-button {
-      background-color: #ffffff;
-      color: #000000;
-    }
+        .dark-mode .toggle-button {
+          background-color: #ffffff;
+          color: #000000;
+        }
 
     </style>
     <title>NINEDASH</title>
