@@ -12,6 +12,13 @@
         a{
             text-decoration: none;
         }
+        .image-list{
+            display: flex;
+            /* flex-wrap: wrap */
+        }
+        .image-list-wrapper {
+            overflow: auto;
+        }
         .container{
             display: flex;
             justify-content: center;
@@ -25,15 +32,19 @@
         <h1>No objects detected in the uploaded images</h1>
     <% } else { %>
         <h1 class="text-center mt-4">Predictions for Uploaded Images</h1>
-        <% for(let i = 0; i < predictions.length; i++) {%>
-            <div class="container">
-                <% if(finalImages[i]) { %>
-                    <img class="block mx-auto w-96 mb-6 mt-8 h-96 rounded-lg" src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img" >
-                <% } else { %>
-                    <p>No object detected in this image.</p>
-                <% } %>
+        <div class="image-list-wrapper">
+            <div class="image-list">
+                <% for(let i = 0; i < predictions.length; i++) {%>
+                    <div class="container">
+                        <% if(finalImages[i]) { %>
+                            <img class="block mx-auto w-96 mb-6 mt-8 h-96 rounded-lg" src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img" >
+                        <% } else { %>
+                            <p>No object detected in this image.</p>
+                        <% } %>
+                    </div>
+                <% } %>SS
             </div>
-        <% } %>
+        </div>
     <% } %>
     <a href="/">
         <button id="btn_back" onmouseover="mouseover()" onmouseout="mouseout()">Back</button>
