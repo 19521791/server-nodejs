@@ -229,7 +229,7 @@
                     </div>
                     <!--end of col-->
                     <div class="col-auto">
-                        <button class="btn btn-lg btn-success" type="submit">Scan</button>
+                        <button class="btn btn-lg btn-success" id="btn-scan-url" type="submit" >Scan</button>
                     </div>
                     <!--end of col-->
                 </div>
@@ -272,5 +272,11 @@
     uploadVideo.addEventListener('click', function(event) {
         event.preventDefault();
         window.location.href = '/video';
+    })
+
+    const scanURL = document.getElementById('btn-scan-url');
+    scanURL.addEventListener('click', function(event) {
+        event.preventDefault();
+        console.log("image scaned");
     })
 </script>
