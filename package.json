@@ -24,6 +24,8 @@
     "amqplib": "^0.10.3",
     "axios": "^1.4.0",
     "canvas": "^2.11.2",
+    "cherio": "^1.0.0-rc.2",
+    "cli-progress": "^3.12.0",
     "cluster": "^0.7.7",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -38,6 +40,7 @@
     "multer": "^1.4.5-lts.1",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
+    "request": "^2.88.2",
     "sharp": "^0.32.1",
     "socket.io": "^4.6.2"
   },
