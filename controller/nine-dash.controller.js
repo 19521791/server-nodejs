@@ -1,6 +1,7 @@
 const path = require("path");
 const detectImage = require("../service/ninedash/detect.service");
 const renderBox = require("../service/ninedash/render-img.service");
+const extract_img_URL = require("../service/ninedash/extract_img_URL.service")
 const fs = require("fs");
 const extractFrame = require("../service/ninedash/extract-frame.service");
 const generateVideo = require("../service/ninedash/render-video.service");
@@ -221,6 +222,42 @@ const renderVideo = async (req, res) => {
     }
 };
 
+const extract_img_from_web = async (req, res) => {
+    console.time('post');
+    const url = req.body.url_input;
+    if (!url) {
+        res.status(400).send("No url");
+    } else {
+        console.log("Success scan url!");
+        console.log(url);
+
+        var list_img = []
+        list_img = await extract_img_URL(url)
+        console.log(list_img)
+
+
+        // try {
+        //     const rabbitMQConnection = getRabbitMQConnection();
+
+        //     const fileNames = req.files.map((file) => file.filename);
+
+        //     fileNames.forEach(async (filename) => {
+        //         if(rabbitMQConnection){
+        //             const channel = await rabbitMQConnection.createChannel();
+        //             await channel.assertQueue("imageQueue");
+        //             channel.sendToQueue("imageQueue", Buffer.from(JSON.stringify({ filename })));
+        //             await channel.close();
+        //         }
+        //    });
+        // } catch (err) {
+        //     console.log(err);
+        //     res.status(500).send("Error saving image names");
+        // } 
+        console.timeEnd('post');
+        // res.redirect(`/nine-dash`);
+    }
+    res.redirect(`/video`);
+};
 
 
 module.exports = {
@@ -228,4 +265,5 @@ module.exports = {
     getImage,
     uploadVideo,
     renderVideo,
+    extract_img_from_web
 };

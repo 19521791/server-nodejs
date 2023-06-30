@@ -1,37 +1,29 @@
-
-// Web Scrapping using Node js and Cherio Request
-// npm install cherio
-// npm install request
-
-// Imports 
 const cherio = require('cherio');
 const request = require('request');
 const fs = require('fs');
 
-// Create a Write Stream 
+
 var WriteStream  = fs.createWriteStream("ImagesLink.txt", "UTF-8");
 
-var url = "https://www.bridgeport.edu/"
+var url = "https://en.wikipedia.org/wiki/Nine-dash_line"
 
-const extrac_img_URL = (url) => {
+const extract_img_URL = (url) => {
     var link_list = []
-    request('https://www.bridgeport.edu/', (err, resp, html)=>{
+    request(url, (err, resp, html)=>{
 
     if(!err && resp.statusCode == 200){
         console.log("Request was success ");
-        
-        // Define Cherio or $ Object 
+
         const $ = cherio.load(html);
 
         $("img").each((index, image)=>{
 
             var img = $(image).attr('src');
-            var baseUrl = 'https://www.bridgeport.edu';
+            var baseUrl = url;
             var Links = baseUrl + img;
             console.log(Links)
-            // WriteStream.write(Links);
-            // WriteStream.write("\n");
-            link_list.push(Links)
+            link_list.push(Links);
+              
         });
 
     }else{
@@ -41,5 +33,5 @@ const extrac_img_URL = (url) => {
 });
 }
 
-
-extrac_img_URL(url)
+module.exports = extract_img_URL;
+// extract_img_URL(url)

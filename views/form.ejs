@@ -137,32 +137,33 @@
         <input type="submit" value="Upload Video" class="btn_submit btn_hover" id="upload_video">
         <input class="btn_cancel btn_hover" type="reset" value="Cancel">
     </div>
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <!------ Include the above in your HEAD tag ---------->
-    
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-    <div class="row justify-content-center">
-            <form class="card card-sm">
-                <div class="card-body row no-gutters align-items-center">
-                    <!-- <div class="col-auto">
-                        <i class="fas fa-search h4 text-body"></i>
-                    </div> -->
-                    <!--end of col-->
-                    <div class="col">
-                        <input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Paste the url to scan">
-                    </div>
-                    <!--end of col-->
-                    <div class="col-auto">
-                        <button class="btn btn-lg btn-success" id="btn-scan-url" type="submit" >Scan</button>
-                    </div>
-                    <!--end of col-->
-                </div>
-            </form>
-        <!--end of col-->
-    </div>
 </form>
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+<div class="row justify-content-center">
+    <form class="card card-sm" action="/url" method="post">
+        <div class="card-body row no-gutters align-items-center">
+            <div class="col-auto">
+                <i class="fas fa-search h4 text-body"></i>
+            </div>
+            
+            <div class="col">
+                <input id = "url_input" name="url_input" class="form-control form-control-lg form-control-borderless" type="url" placeholder="Paste the url to scan">
+            </div>
+    
+            <div class="col-auto">
+                <button class="btn btn-lg btn-success" id="btn-scan-url" type="submit" onclick="return validateFormURL(event)">Scan</button>
+            </div>
+            <span class="error" id="url_error"></span>
+    
+        </div>
+    </form>
+</div>
 </main>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -190,7 +191,6 @@
             event.preventDefault();
             return false;
         }
-
         fileError.textContent = "";
         fileError.style.display = "none";
         return true;
@@ -202,9 +202,17 @@
         window.location.href = '/video';
     })
 
-    const scanURL = document.getElementById('btn-scan-url');
-    scanURL.addEventListener('click', function(event) {
-        event.preventDefault();
-        console.log("image scaned");
-    })
+    function validateFormURL(event) {
+        let urlError = document.getElementById('url_error');
+        var url = $('#url_input').val();
+        if (url === '') {
+            urlError.textContent = "Please paste the url to scan.";
+            urlError.style.display = "inline-block";
+            urlError.style.marginTop = "0.5rem";
+            urlError.style.color = "red";
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    }
 </script>
