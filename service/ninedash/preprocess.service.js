@@ -1,6 +1,5 @@
 const sharp = require("sharp");
 const tf = require("@tensorflow/tfjs-node");
-const { loadImage } = require("canvas");
 
 const preprocess = async (source, modelWidth, modelHeight) => {
     console.time('preprocess');

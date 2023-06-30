@@ -4,7 +4,7 @@ defaults:
 	up
 
 up:
-	docker-compose up
+	docker-compose up --remove-orphans
 
 container:
 	docker-compose up my-container

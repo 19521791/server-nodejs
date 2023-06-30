@@ -76,6 +76,9 @@ const renderBoxes = (
             }
             console.timeEnd('draw');
             return canvas;
+        })
+        .catch((err) => {
+            console.log('Error in render image');
         });
 };
 
