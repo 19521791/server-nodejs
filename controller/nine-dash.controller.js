@@ -1,5 +1,7 @@
 const path = require("path");
 const detectImage = require("../service/ninedash/detect.service");
+const detectImage_handleimg = require("../service/ninedash/detect_handleimg.service");
+
 const renderBox = require("../service/ninedash/render-img.service");
 const extract_img_URL = require("../service/ninedash/extract_img_URL.service")
 const fs = require("fs");
@@ -7,6 +9,8 @@ const extractFrame = require("../service/ninedash/extract-frame.service");
 const generateVideo = require("../service/ninedash/render-video.service");
 const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
 const { getMessageFromQueue } = require('../provider/ready-for-rabbit');
+const axios = require('axios');
+
 
 const classThreshold = 0.2;
 
@@ -22,6 +26,7 @@ const uploadImage = async (req, res) => {
             const fileNames = req.files.map((file) => file.filename);
 
             fileNames.forEach(async (filename) => {
+              console.log("path=" + filename)
                 if(rabbitMQConnection){
                     const channel = await rabbitMQConnection.createChannel();
                     await channel.assertQueue("imageQueue");
@@ -54,7 +59,7 @@ const getImage = async (req, res) => {
   
         for (const message of messages) {
           const { filename } = message;
-  
+
           const imagePath = path.join(__dirname, "..", "uploads", filename);
   
           const predictions = await detectImage(imagePath, model);
@@ -230,40 +235,114 @@ const extract_img_from_web = async (req, res) => {
     } else {
         console.log("Success scan url!");
         console.log(url);
+        const list_img_url = await extract_img_URL(url);
 
-        var list_img = []
-        list_img = await extract_img_URL(url)
-        console.log(list_img)
-
-
-        // try {
-        //     const rabbitMQConnection = getRabbitMQConnection();
-
-        //     const fileNames = req.files.map((file) => file.filename);
-
-        //     fileNames.forEach(async (filename) => {
-        //         if(rabbitMQConnection){
-        //             const channel = await rabbitMQConnection.createChannel();
-        //             await channel.assertQueue("imageQueue");
-        //             channel.sendToQueue("imageQueue", Buffer.from(JSON.stringify({ filename })));
-        //             await channel.close();
-        //         }
-        //    });
-        // } catch (err) {
-        //     console.log(err);
-        //     res.status(500).send("Error saving image names");
-        // } 
+        if (!list_img_url) {
+            console.log("Success scan url!");
+        }
+        else {
+            try {
+                const rabbitMQConnection = getRabbitMQConnection();
+                list_img_url.forEach(async (img_url) => {
+                    if(rabbitMQConnection && !img_url.endsWith('.webp')){
+                      console.log(img_url)
+                      const channel = await rabbitMQConnection.createChannel();
+                      await channel.assertQueue("imageURLQueue");
+                      channel.sendToQueue("imageURLQueue", Buffer.from(JSON.stringify({ img_url })));
+                      await channel.close();
+                    }
+               });
+            } catch (err) {
+                console.log(err);
+                res.status(500).send("Error saving image url");
+            } 
+        }
+      
         console.timeEnd('post');
-        // res.redirect(`/nine-dash`);
+        res.redirect(`/nine-dash-url`);
     }
-    res.redirect(`/video`);
+    // res.redirect(`/video`);
 };
 
+const getImage_URL = async (req, res) => {
+  console.time('get');
+  const model = global.modeler;
+  const io = req.app.get('io');
+  try {
+    const messages = await getMessageFromQueue("imageURLQueue");
+    let process = messages.length;
+    if (messages.length === 0) {
+      console.log("No messages available in the queue.");
+      res.status(204).send("No images to process.");
+    } else {
+      const finalImages = [];
+      const allPredictions = [];
+      let handleImage;
+
+      for (const message of messages) {
+        const { img_url } = message;
+
+        const predictions = await detectImage_handleimg(img_url, model);
+
+        try {
+          const response = await axios({
+            url: img_url,
+            responseType: 'arraybuffer'
+          });
+          handleImage = Buffer.from(response.data, 'binary');
+          // fs.writeFileSync('image.jpg', handleImage);
+          console.log('Hình ảnh đã được tải về và lưu vào biến handleImage');
+        } catch (error) {
+          console.log(error);
+        }
+
+        if (predictions) {
+          const [xmin, ymin, width, height] = predictions.bbox;
+          const score = predictions.score;
+          const predictedClass = predictions.class;
+          const [xRatio, yRatio] = predictions.ratio;
+
+          console.log("Coordinate bboxes: ", xmin, ymin, width, height);
+          console.log("Confident: ", score);
+          console.log("Class: ", predictedClass);
+
+          const canvas = await renderBox(
+            handleImage,
+            classThreshold,
+            [xmin, ymin, width, height],
+            [score],
+            [predictedClass],
+            [xRatio, yRatio]
+          );
+
+          const buffer = canvas.toBuffer("image/png");
+          // fs.writeFileSync(imagePath, buffer);
+          const tempImage = buffer.toString("base64");
+          finalImages.push(`data:image/jpeg;base64, ${tempImage}`);
+        } else {
+          finalImages.push(null);
+        }
+        
+        allPredictions.push(predictions);
+
+      }
+      console.timeEnd('get');
+      res.render("displayImage.ejs", {
+        predictions: allPredictions,
+        finalImages: finalImages,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error detecting objects in images.");
+  }
+};
 
 module.exports = {
     uploadImage,
     getImage,
     uploadVideo,
     renderVideo,
-    extract_img_from_web
+    extract_img_from_web,
+    getImage_URL
 };
