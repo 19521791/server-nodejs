@@ -1,4 +1,4 @@
-<h1 align="center">HOW TO IMPLEMENT A DEEPLEARNING MODEL INTO SERVER</h1>
+clone<h1 align="center">HOW TO IMPLEMENT A DEEPLEARNING MODEL INTO SERVER</h1>
 
 <h2 align="center">DETECTING NINE DASH LINE IN IMAGES OR VIDEO</h2>
 
@@ -48,6 +48,8 @@
 <p>Setup guide</p>
 <p></p>
 <p>Linux</p>
+<span><b>git clone https://github.com/19521791/server-nodejs.git</b></span>
+<span><b>cd server-nodejs</b></span>
 <span>If you only want to run the server and enjoy the results, just execute the command:</span>
 <ul>
   <li><b>make image</b></li>
@@ -61,9 +63,13 @@
   <ul>
     <li><b>make image</b></li>
     <li>
-      change this path: <b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just clone,
-      because code in container and code in cloned folder are not the same so you need to mount it into container. When you change your code, code in container auto change
+      Uncomment volumes section in docker-compose file ```
+      # volumes:
+      #   - /home/long1100/server:/usr/src/app
+      ```
     </li>
+    <li><b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just clone,
+      because code in container and code in cloned folder are not the same so you need to mount it into container. When you change your code, code in container auto change</li>
     <li>Run command: <b>make rabbit</b></li>
     <li>Run command: <b>make container</b></li>
   </ul>
