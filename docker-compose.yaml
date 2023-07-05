@@ -12,8 +12,8 @@ services:
     image: server
     ports:
       - 8080:3500
-    volumes:
-      - /home/long1100/server:/usr/src/app
+    # volumes:
+    #   - /home/long1100/server:/usr/src/app
     command: sh -c "sleep 7 && npm start"
    
     
