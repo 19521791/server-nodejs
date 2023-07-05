@@ -63,7 +63,8 @@ clone<h1 align="center">HOW TO IMPLEMENT A DEEPLEARNING MODEL INTO SERVER</h1>
   <ul>
     <li><b>make image</b></li>
     <li>
-      Uncomment volumes section in docker-compose file ```
+      Uncomment volumes section in docker-compose file 
+      ```
       # volumes:
       #   - /home/long1100/server:/usr/src/app
       ```
