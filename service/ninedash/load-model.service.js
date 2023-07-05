@@ -16,4 +16,4 @@ async function loadModel() {
     return model;
 }
 
-module.exports = loadModel;
+module.exports = { loadModel };

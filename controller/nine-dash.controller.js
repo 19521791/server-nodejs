@@ -5,16 +5,14 @@ const fs = require("fs");
 const extractFrame = require("../service/ninedash/extract-frame.service");
 const generateVideo = require("../service/ninedash/render-video.service");
 const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
-const { getMessageFromQueue } = require('../provider/ready-for-rabbit');
-
-const classThreshold = 0.2;
+const { getMessageFromQueue } = require('../provider/ready-for-rabbit.provider');
+const execImage = require('../provider/process-image.provider');
 
 const uploadImage = async (req, res) => {
     console.time('post');
     if (!req.files) {
         res.status(400).send("No files uploaded.");
     } else {
-        console.log("Success upload image!");
         try {
             const rabbitMQConnection = getRabbitMQConnection();
 
@@ -38,76 +36,44 @@ const uploadImage = async (req, res) => {
 };
 
 const getImage = async (req, res) => {
-    console.time('get');
     const model = global.modeler;
-    const io = req.app.get('io');
+    const finalImages = [];
+    const allPredictions = [];
     try {
-      const messages = await getMessageFromQueue("imageQueue");
-      let process = messages.length;
-      if (messages.length === 0) {
-        console.log("No messages available in the queue.");
-        res.status(204).send("No images to process.");
-      } else {
-        const finalImages = [];
-        const allPredictions = [];
-  
-        for (const message of messages) {
-          const { filename } = message;
-  
-          const imagePath = path.join(__dirname, "..", "uploads", filename);
-  
-          const predictions = await detectImage(imagePath, model);
+        const messages = await getMessageFromQueue("imageQueue");
 
-          const handleImage = fs.readFileSync(imagePath);
-  
-          if (predictions) {
-            const [xmin, ymin, width, height] = predictions.bbox;
-            const score = predictions.score;
-            const predictedClass = predictions.class;
-            const [xRatio, yRatio] = predictions.ratio;
-  
-            console.log("Coordinate bboxes: ", xmin, ymin, width, height);
-            console.log("Confident: ", score);
-            console.log("Class: ", predictedClass);
-  
-            const canvas = await renderBox(
-              handleImage,
-              classThreshold,
-              [xmin, ymin, width, height],
-              [score],
-              [predictedClass],
-              [xRatio, yRatio]
-            );
-  
-            const buffer = canvas.toBuffer("image/png");
-            fs.writeFileSync(imagePath, buffer);
-            const tempImage = buffer.toString("base64");
-            finalImages.push(`data:image/jpeg;base64, ${tempImage}`);
-            // if(io){
-            //     process --;
-            //     console.log('IO is working');
-            // io.emit('process', {process: 100});
-            // } else{
-            //     console.log('IO is not working');
-            // }
-          } else {
-            finalImages.push(null);
-          }
-          
-          allPredictions.push(predictions);
-        }
-        console.timeEnd('get');
+        if (messages.length === 0) {
+
+            res.render("displayImage.ejs", {
+                predictions: allPredictions,
+                finalImages: finalImages,
+            });
+        } else {
+
+        await Promise.all(
+            messages.map(async (message) => {
+
+            const { filename } = message;
+
+            const imagePath = path.join(__dirname, '..', 'uploads', filename);
+
+            const result = await execImage(imagePath, model);
+
+            finalImages.push(result.img);
+            allPredictions.push(result.predictions);
+            })
+        );
+
         res.render("displayImage.ejs", {
-          predictions: allPredictions,
-          finalImages: finalImages,
+            predictions: allPredictions,
+            finalImages: finalImages,
         });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Error detecting objects in images.");
       }
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Error detecting objects in images.");
-    }
   };
-  
 
 const uploadVideo = async (req, res) => {
     console.time('uploadVideo');
@@ -220,8 +186,6 @@ const renderVideo = async (req, res) => {
         console.log(err);
     }
 };
-
-
 
 module.exports = {
     uploadImage,
