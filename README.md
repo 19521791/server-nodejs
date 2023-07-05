@@ -63,11 +63,9 @@ clone<h1 align="center">HOW TO IMPLEMENT A DEEPLEARNING MODEL INTO SERVER</h1>
   <ul>
     <li><b>make image</b></li>
     <li>
-      Uncomment volumes section in docker-compose file 
-      ```
-      # volumes:
+      Uncomment volumes section in docker-compose file <br>
+      ` # volumes: `
       #   - /home/long1100/server:/usr/src/app
-      ```
     </li>
     <li><b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just clone,
       because code in container and code in cloned folder are not the same so you need to mount it into container. When you change your code, code in container auto change</li>
