@@ -6,15 +6,13 @@ const extractFrame = require("../service/ninedash/extract-frame.service");
 const generateVideo = require("../service/ninedash/render-video.service");
 const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
 const { getMessageFromQueue } = require('../provider/ready-for-rabbit.provider');
-const processImage = require('../provider/process-image.provider');
-
+const execImage = require('../provider/process-image.provider');
 
 const uploadImage = async (req, res) => {
     console.time('post');
     if (!req.files) {
         res.status(400).send("No files uploaded.");
     } else {
-        console.log("Success upload image!");
         try {
             const rabbitMQConnection = getRabbitMQConnection();
 
@@ -38,40 +36,38 @@ const uploadImage = async (req, res) => {
 };
 
 const getImage = async (req, res) => {
+    const model = global.modeler;
+    const finalImages = [];
+    const allPredictions = [];
     try {
         const messages = await getMessageFromQueue("imageQueue");
-        
+
         if (messages.length === 0) {
-            console.log("No messages available in the queue.");
-            res.status(204).send("No images to process.");
-        } else {
-            const finalImages = [];
-            const allPredictions = [];
-            const imagePaths = [];
 
-            for (message of messages){
-                const { filename } = message;
-                imagePaths.push(path.join(__dirname, '..', 'uploads', filename));
-            }
-
-            await processImage(imagePaths)
-            .then(results => {
-                results.forEach((result) => {
-                const { predictions } = result;
-                    console.log(predictions);
-                allPredictions.push(predictions);
-                
-                });
-            })
-            .catch(error => {
-              console.error('Error:', error);
+            res.render("displayImage.ejs", {
+                predictions: allPredictions,
+                finalImages: finalImages,
             });
+        } else {
 
-            // res.render("displayImage.ejs", {
-            //     predictions: allPredictions,
-            //     finalImages: finalImages,
-            // });
-            res.send('long dep trai');
+        await Promise.all(
+            messages.map(async (message) => {
+
+            const { filename } = message;
+
+            const imagePath = path.join(__dirname, '..', 'uploads', filename);
+
+            const result = await execImage(imagePath, model);
+
+            finalImages.push(result.img);
+            allPredictions.push(result.predictions);
+            })
+        );
+
+        res.render("displayImage.ejs", {
+            predictions: allPredictions,
+            finalImages: finalImages,
+        });
         }
       } catch (error) {
         console.error(error);

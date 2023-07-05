@@ -11,7 +11,7 @@ container:
 
 rabbit:
 	docker-compose up rabbitmq
-  
+
 # Docker build command
 image:
 	docker build -t server .

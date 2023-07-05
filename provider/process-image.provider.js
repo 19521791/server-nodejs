@@ -1,21 +1,27 @@
-const workerpool = require('workerpool');
-const path = require('path');
+const detectImage = require('../service/ninedash/detect.service');
+const renderBox = require('../service/ninedash/render-img.service');
+const fs = require('fs');
 
-const workerPath = path.join(__dirname, 'worker.provider.js');
-const pool = workerpool.pool(workerPath, { maxWorkers: 2 });
+const classThreshold = 0.2;
 
-const processImage = async (imagePaths) => {
-  console.log('Exec outside')
-  const results = await Promise.all(
-    imagePaths.map(async (imagePath) => {
-      console.log('Exec inside');
-      await pool.exec('processImageWorker', [imagePath]);
-    })
-  );
-
-  return results;
+const execImage = async (imagePath, model) => {
+    const predictions = await detectImage(imagePath, model);
+    const img = fs.readFileSync(imagePath);
+    if (predictions) {
+        const [xmin, ymin, width, height] = predictions.bbox;
+        const score = predictions.score;
+        const predictedClass = predictions.class;
+        const [xRatio, yRatio] = [1, 1];
+        const canvas = await renderBox(img, classThreshold, [xmin, ymin, width, height], [score], [predictedClass], [xRatio, yRatio],)
+        
+        const tempImage = canvas.toString("base64");
+        const final = `data:image/jpeg;base64, ${tempImage}`;
+        
+        return { predictions: predictions, img: final };
+        
+    } else {
+        return { predictions: null, img: null };
+    }
 };
 
-module.exports = processImage;
-
-
+module.exports = execImage;
