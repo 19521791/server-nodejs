@@ -48,7 +48,7 @@ clone<h1 align="center">HOW TO IMPLEMENT A DEEPLEARNING MODEL INTO SERVER</h1>
 <p>Setup guide</p>
 <p></p>
 <p>Linux</p>
-<span><b>git clone https://github.com/19521791/server-nodejs.git</b></span>
+<p><b>git clone https://github.com/19521791/server-nodejs</b></p>
 <span><b>cd server-nodejs</b></span>
 <span>If you only want to run the server and enjoy the results, just execute the command:</span>
 <ul>
