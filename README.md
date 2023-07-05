@@ -65,8 +65,7 @@
     <li>
       Uncomment volumes section in docker-compose file
     </li>
-    <li>Change <b>/home/long1100/temp</b> in `docker-compose.yaml/volumes section` to absolute path to the folder you just clone,
-      because code in container and code in cloned folder are not the same so you need to mount it into container. When you change your code, code in container auto change</li>
+    <li>Change <b>/home/long1100/temp</b> in docker-compose.yaml/volumes section to absolute path to the folder you just clone.</li>
     <li><b>make up</b></li>
   </ul>
   
