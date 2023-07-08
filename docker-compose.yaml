@@ -1,27 +1,51 @@
 version: "3"
 services:
+  my-container:
+      depends_on:
+        - rabbitmq
+        # - redis
+      networks:
+        - rabbit-network
+        # - redis-network
+      image: server
+      ports:
+        - 8080:3500
+      volumes:
+        - /home/long1100/server:/usr/src/app
+      command: sh -c "sleep 10 && npm start"
+      restart: unless-stopped
+      healthcheck:
+        test: wget --quiet --tries=1 --spider http://localhost:3500 || exit 1z
+        interval: 30s
+        timeout: 10s
+        retries: 5
   rabbitmq:
-    image: rabbitmq:latest
+    image: dubc/rabbitmq-alpine-all-plugins
     ports:
       - 5672:5672
       - 15672:15672
-  redis:
-    image: redis
-    ports:
-      - '6379:6379'
-    volumes:
-      - /home/long1100/server/redis-data:/usr/src/app/data
-    restart: always
+    networks:
+      - rabbit-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  # redis:
+  #   image: lucacri/redis-alpine
+  #   ports:
+  #     - '6379:6379'
+  #   volumes:
+  #     - /home/long1100/server/redis-data:/usr/src/app/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - redis-network
 
-  my-container:
-    depends_on:
-      - rabbitmq
-      - redis
-    image: server
-    ports:
-      - 8080:3500
-    volumes:
-      - /home/long1100/server:/usr/src/app
-    command: sh -c "sleep 10 && npm start"
+networks:
+  rabbit-network:
+    driver: bridge
+  # redis-network:
+  #   driver: bridge
+  
    
     
