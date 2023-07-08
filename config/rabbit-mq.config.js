@@ -1,12 +1,12 @@
-const amqp = require('amqplib');
+const amqp = require("amqplib");
 
 let rabbitMQConnection = null;
 
 const connectToRabbitMQ = async () => {
-    console.time('rabbit');
+    console.time("rabbit");
     try {
         rabbitMQConnection = await amqp.connect({
-            hostname: 'rabbitmq',
+            hostname: "rabbitmq",
             port: 5672,
             heartbeat: 60,
         });
@@ -14,12 +14,11 @@ const connectToRabbitMQ = async () => {
     } catch (err) {
         console.log("Error connecting to RabbitMQ:", err);
     }
-    console.timeEnd('rabbit');
-}
-
+    console.timeEnd("rabbit");
+};
 
 const getRabbitMQConnection = () => {
     return rabbitMQConnection;
-}
+};
 
 module.exports = { connectToRabbitMQ, getRabbitMQConnection };

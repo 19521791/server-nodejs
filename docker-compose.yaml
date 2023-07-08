@@ -5,15 +5,23 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - /home/long1100/server/redis-data:/usr/src/app/data
+    restart: always
 
   my-container:
     depends_on:
       - rabbitmq
+      - redis
     image: server
     ports:
       - 8080:3500
-    # volumes:
-    #   - /home/long1100/server:/usr/src/app
-    command: sh -c "sleep 7 && npm start"
+    volumes:
+      - /home/long1100/server:/usr/src/app
+    command: sh -c "sleep 10 && npm start"
    
     

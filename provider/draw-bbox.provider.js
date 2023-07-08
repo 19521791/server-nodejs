@@ -1,12 +1,11 @@
-const detectImage = require("../service/ninedash/detect.service");
 const renderBox = require("../service/ninedash/render-img.service");
+const preprocess = require("../service/ninedash/preprocess.service");
 const fs = require("fs");
 
 const CLASS_THRESHOLD = 0.2;
 
-const execImage = async (imagePath, model) => {
-    const predictions = await detectImage(imagePath, model);
-    const img = fs.readFileSync(imagePath);
+const draw = async (predictions, img_) => {
+    const img = fs.readFileSync(img_);
     if (predictions) {
         const [xmin, ymin, width, height] = predictions.bbox;
         const score = predictions.score;
@@ -20,6 +19,7 @@ const execImage = async (imagePath, model) => {
             [predictedClass],
             [xRatio, yRatio],
         );
+
         const tempImage = imgRender.toString("base64");
 
         return { predictions: predictions, img: tempImage };
@@ -28,4 +28,4 @@ const execImage = async (imagePath, model) => {
     }
 };
 
-module.exports = execImage;
+module.exports = draw;

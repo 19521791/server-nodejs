@@ -7,9 +7,16 @@ const morgan = require("morgan");
 const notfound = require("./route/404");
 const viewEngine = require("./config/engine.config");
 const video = require("./route/nine-dash-video.route");
-const cors = require('cors');
+const cors = require("cors");
+const compression = require("compression");
 
 app = express();
+app.use(
+    compression({
+        level: 6,
+        threshold: 100 * 1000,
+    }),
+);
 app.use(cors());
 app.use(viewEngine);
 app.use(morgan("dev"));
