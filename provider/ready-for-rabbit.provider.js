@@ -1,4 +1,4 @@
-const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
+const { getRabbitMQConnection } = require("../config/rabbit-mq.config");
 
 const getMessageFromQueue = async (queueName) => {
     const rabbitMQConnection = getRabbitMQConnection();
@@ -7,9 +7,9 @@ const getMessageFromQueue = async (queueName) => {
 
     const messages = [];
 
-    while(true){
+    while (true) {
         const message = await channel.get(queueName);
-        if(!message){
+        if (!message) {
             break;
         }
 
@@ -18,6 +18,6 @@ const getMessageFromQueue = async (queueName) => {
     }
 
     return messages;
-}
+};
 
 module.exports = { getMessageFromQueue };

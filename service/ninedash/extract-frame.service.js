@@ -4,7 +4,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 
 const processVideoFrames = async (videoPath, frameDir) => {
     return new Promise((resolve, reject) => {
-        console.time('extractFrame');
+        console.time("extractFrame");
         ffmpeg(videoPath)
             .output(`${frameDir}/frame-%d.png`)
             .on("end", () => {
@@ -14,7 +14,7 @@ const processVideoFrames = async (videoPath, frameDir) => {
                 reject(err);
             })
             .run();
-        console.timeEnd('extracFrame');
+        console.timeEnd("extractFrame");
     });
 };
 
