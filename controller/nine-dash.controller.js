@@ -282,7 +282,6 @@ const getImage_URL = async (req, res) => {
       for (const message of messages) {
         const { img_url } = message;
 
-        const predictions = await detectImage_handleimg(img_url, model);
 
         try {
           const response = await axios({
@@ -291,40 +290,39 @@ const getImage_URL = async (req, res) => {
           });
           handleImage = Buffer.from(response.data, 'binary');
           // fs.writeFileSync('image.jpg', handleImage);
-          console.log('Hình ảnh đã được tải về và lưu vào biến handleImage');
+          // console.log('Hình ảnh đã được tải về và lưu vào biến handleImage');
+          const predictions = await detectImage_handleimg(handleImage, model);
+          if (predictions && predictions.class == 1) {
+            const [xmin, ymin, width, height] = predictions.bbox;
+            const score = predictions.score;
+            const predictedClass = predictions.class;
+            const [xRatio, yRatio] = predictions.ratio;
+  
+            console.log("Coordinate bboxes: ", xmin, ymin, width, height);
+            console.log("Confident: ", score);
+            console.log("Class: ", predictedClass);
+  
+            const canvas = await renderBox(
+              handleImage,
+              classThreshold,
+              [xmin, ymin, width, height],
+              [score],
+              [predictedClass],
+              [xRatio, yRatio]
+            );
+  
+            const buffer = canvas.toBuffer("image/png");
+            // fs.writeFileSync(imagePath, buffer);
+            const tempImage = buffer.toString("base64");
+            finalImages.push(`data:image/jpeg;base64, ${tempImage}`);
+          } else {
+            finalImages.push(null);
+          }
+          allPredictions.push(predictions);
         } catch (error) {
           console.log(error);
+          continue;
         }
-
-        if (predictions) {
-          const [xmin, ymin, width, height] = predictions.bbox;
-          const score = predictions.score;
-          const predictedClass = predictions.class;
-          const [xRatio, yRatio] = predictions.ratio;
-
-          console.log("Coordinate bboxes: ", xmin, ymin, width, height);
-          console.log("Confident: ", score);
-          console.log("Class: ", predictedClass);
-
-          const canvas = await renderBox(
-            handleImage,
-            classThreshold,
-            [xmin, ymin, width, height],
-            [score],
-            [predictedClass],
-            [xRatio, yRatio]
-          );
-
-          const buffer = canvas.toBuffer("image/png");
-          // fs.writeFileSync(imagePath, buffer);
-          const tempImage = buffer.toString("base64");
-          finalImages.push(`data:image/jpeg;base64, ${tempImage}`);
-        } else {
-          finalImages.push(null);
-        }
-        
-        allPredictions.push(predictions);
-
       }
       console.timeEnd('get');
       res.render("displayImage.ejs", {

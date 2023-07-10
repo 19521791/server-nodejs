@@ -12,9 +12,11 @@ const extract_img_URL = (url) => {
 
         $("img").each((index, image) => {
           var img = $(image).attr('src');
-          var baseUrl = url;
-          var Links = baseUrl + img;
-          link_list.push(Links);
+          if (img.startsWith("http")) {
+            link_list.push(img);
+          } else {
+            link_list.push(url + img)
+          }
         });
 
         resolve(link_list); // trả về link_list khi request thành công
