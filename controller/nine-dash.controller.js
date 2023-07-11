@@ -106,6 +106,7 @@ const getImage = async (req, res) => {
         res.render("displayImage.ejs", {
           predictions: allPredictions,
           finalImages: finalImages,
+          path: "/nine-dash"
         });
       }
     } catch (error) {
@@ -261,7 +262,6 @@ const extract_img_from_web = async (req, res) => {
         console.timeEnd('post');
         res.redirect(`/nine-dash-url`);
     }
-    // res.redirect(`/video`);
 };
 
 const getImage_URL = async (req, res) => {
@@ -321,7 +321,6 @@ const getImage_URL = async (req, res) => {
             // finalImages.push(null);
             // allPredictions.push(null);
           }
-          // allPredictions.push(predictions);
         } catch (error) {
           console.log(error);
           continue;
@@ -331,6 +330,7 @@ const getImage_URL = async (req, res) => {
       res.render("displayImage.ejs", {
         predictions: allPredictions,
         finalImages: finalImages,
+        path: "/nine-dash-url"
       });
     }
   } catch (error) {
