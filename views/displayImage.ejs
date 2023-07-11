@@ -85,9 +85,19 @@
     <button id="toggleButton" class="toggle-button">Light</button>
 
     <% if (predictions.length === 0) { %>
-        <h1>No objects detected in the uploaded images</h1>
+      <!-- <h1>No objects detected in the uploaded images</h1> -->
+      <% if(path === '/nine-dash-url') { %>
+        <h1>This URL don't have nine-dash line images</h1> 
+      <% } else { %>
+        <h1>No objects detected in the uploaded images</h1> 
+      <% } %>
     <% } else { %>
-        <h1 class="text-center mt-4">Predictions for Uploaded Images</h1>
+        <!-- <h1 class="text-center mt-4">Predictions for Uploaded Images</h1> -->
+        <% if(path === '/nine-dash-url') { %>
+          <h1 class="text-center mt-4">Predictions for URL </h1>
+        <% } else { %>
+          <h1 class="text-center mt-4">Predictions for Uploaded Images</h1>
+        <% } %>
         <div class="img-row">
             <% for(let i = 0; i < predictions.length; i++) {%>
                <div class="img-item">
@@ -95,7 +105,12 @@
                     <% if(finalImages[i]) { %>
                         <img src="<%= finalImages[i] %>" alt="Detected Object" id="uploaded_img" >
                     <% } else { %>
+                      <!-- <p>No object detected in this image.</p> -->
+                      <% if(path === '/nine-dash-url') { %>
+                        <p>No object detected in this link-image.</p>
+                      <% } else { %>
                         <p>No object detected in this image.</p>
+                      <% } %>
                     <% } %>
                 </div>
                </div>

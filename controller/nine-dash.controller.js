@@ -1,17 +1,18 @@
 const path = require("path");
+const detectImage = require("../service/ninedash/detect.service");
+const detectImage_handleimg = require("../service/ninedash/detect_handleimg.service");
+
+const renderBox = require("../service/ninedash/render-img.service");
+const extract_img_URL = require("../service/ninedash/extract_img_URL.service")
 const fs = require("fs");
 const extractFrame = require("../service/ninedash/extract-frame.service");
 const generateVideo = require("../service/ninedash/render-video.service");
-const { getRabbitMQConnection } = require("../config/rabbit-mq.config");
-const { getMessageFromQueue } = require("../provider/ready-for-rabbit.provider");
-const execImage = require("../provider/process-image.provider");
-const size = require('../provider/size.provider');
-const compress = require('../service/ninedash/compress.service');
-const compareFramesAndInfer = require('../provider/infer-video.provider');
+const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
+const { getMessageFromQueue } = require('../provider/ready-for-rabbit.provider');
+const axios = require('axios');
 
 
-const THRESHOLD_MATCHED = 0.1;
-const COMPRESS_QUALITY = 50;
+const execImage = require('../provider/process-image.provider');
 
 const uploadImage = async (req, res) => {
     if (req.files) {
@@ -33,7 +34,8 @@ const uploadImage = async (req, res) => {
             });
 
             fileNames.forEach(async (filename) => {
-                if (rabbitMQConnection) {
+              console.log("path=" + filename)
+                if(rabbitMQConnection){
                     const channel = await rabbitMQConnection.createChannel();
                     await channel.assertQueue("imageQueue");
                     channel.sendToQueue(
@@ -154,9 +156,122 @@ const renderVideo = async (req, res) => {
     }
 };
 
+const extract_img_from_web = async (req, res) => {
+    console.time('post');
+    const url = req.body.url_input;
+    if (!url) {
+        res.status(400).send("No url");
+    } else {
+        console.log("Success scan url!");
+        console.log(url);
+        const list_img_url = await extract_img_URL(url);
+
+        if (!list_img_url) {
+            console.log("Success scan url!");
+        }
+        else {
+            try {
+                const rabbitMQConnection = getRabbitMQConnection();
+                list_img_url.forEach(async (img_url) => {
+                    if(rabbitMQConnection && !img_url.endsWith('.webp')){
+                      console.log(img_url)
+                      const channel = await rabbitMQConnection.createChannel();
+                      await channel.assertQueue("imageURLQueue");
+                      channel.sendToQueue("imageURLQueue", Buffer.from(JSON.stringify({ img_url })));
+                      await channel.close();
+                    }
+               });
+            } catch (err) {
+                console.log(err);
+                res.status(500).send("Error saving image url");
+            } 
+        }
+      
+        console.timeEnd('post');
+        res.redirect(`/nine-dash-url`);
+    }
+};
+
+const getImage_URL = async (req, res) => {
+  console.time('get');
+  const model = global.modeler;
+  const io = req.app.get('io');
+  try {
+    const messages = await getMessageFromQueue("imageURLQueue");
+    let process = messages.length;
+    if (messages.length === 0) {
+      console.log("No messages available in the queue.");
+      res.status(204).send("No images to process.");
+    } else {
+      const finalImages = [];
+      const allPredictions = [];
+      let handleImage;
+
+      for (const message of messages) {
+        const { img_url } = message;
+
+
+        try {
+          const response = await axios({
+            url: img_url,
+            responseType: 'arraybuffer'
+          });
+          handleImage = Buffer.from(response.data, 'binary');
+          // fs.writeFileSync('image.jpg', handleImage);
+          // console.log('Hình ảnh đã được tải về và lưu vào biến handleImage');
+          const predictions = await detectImage_handleimg(handleImage, model);
+          if (predictions && predictions.class == 1) {
+            const [xmin, ymin, width, height] = predictions.bbox;
+            const score = predictions.score;
+            const predictedClass = predictions.class;
+            const [xRatio, yRatio] = predictions.ratio;
+  
+            console.log("Coordinate bboxes: ", xmin, ymin, width, height);
+            console.log("Confident: ", score);
+            console.log("Class: ", predictedClass);
+  
+            const canvas = await renderBox(
+              handleImage,
+              classThreshold,
+              [xmin, ymin, width, height],
+              [score],
+              [predictedClass],
+              [xRatio, yRatio]
+            );
+  
+            const buffer = canvas.toBuffer("image/png");
+            // fs.writeFileSync(imagePath, buffer);
+            const tempImage = buffer.toString("base64");
+            finalImages.push(`data:image/jpeg;base64, ${tempImage}`);
+            allPredictions.push(predictions);
+
+          } else {
+            // finalImages.push(null);
+            // allPredictions.push(null);
+          }
+        } catch (error) {
+          console.log(error);
+          continue;
+        }
+      }
+      console.timeEnd('get');
+      res.render("displayImage.ejs", {
+        predictions: allPredictions,
+        finalImages: finalImages,
+        path: "/nine-dash-url"
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error detecting objects in images.");
+  }
+};
+
 module.exports = {
     uploadImage,
     getImage,
     uploadVideo,
     renderVideo,
+    extract_img_from_web,
+    getImage_URL
 };
