@@ -6,6 +6,15 @@ defaults:
 up:
 	docker-compose up --remove-orphans
 
+detach:
+	docker-compose up -d --remove-orphans
+
+down:
+	docker-compose down
+
+stop:
+	docker-compose stop
+
 container:
 	docker-compose up my-container
 

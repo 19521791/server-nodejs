@@ -12,7 +12,7 @@ const compareFramesAndInfer = async (
     outputPath,
 ) => {
     let previousImage = null;
-    const concurrencyLimit = 10; // Set the desired concurrency level
+    const concurrencyLimit = 10; 
     const promises = [];
     let result;
     for (const file of imageFiles) {
@@ -22,9 +22,7 @@ const compareFramesAndInfer = async (
 
         if (previousImage) {
             const mismatchedPixels = compareImages(previousImage, currentImage);
-            const isMatch =
-                mismatchedPixels / (currentImage.width * currentImage.height) <=
-                threshold;
+            const isMatch = mismatchedPixels / (currentImage.width * currentImage.height) <= threshold;
 
             let promise;
             if (isMatch) {

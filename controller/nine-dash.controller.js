@@ -5,9 +5,13 @@ const generateVideo = require("../service/ninedash/render-video.service");
 const { getRabbitMQConnection } = require("../config/rabbit-mq.config");
 const { getMessageFromQueue } = require("../provider/ready-for-rabbit.provider");
 const execImage = require("../provider/process-image.provider");
-const compareFramesAndInfer = require("../provider/infer-video.provider");
+const size = require('../provider/size.provider');
+const compress = require('../service/ninedash/compress.service');
+const compareFramesAndInfer = require('../provider/infer-video.provider');
+
 
 const THRESHOLD_MATCHED = 0.1;
+const COMPRESS_QUALITY = 50;
 
 const uploadImage = async (req, res) => {
     if (req.files) {
@@ -15,6 +19,18 @@ const uploadImage = async (req, res) => {
             const rabbitMQConnection = getRabbitMQConnection();
 
             const fileNames = req.files.map((file) => file.filename);
+
+            const savedPath = path.join(__dirname, '..', 'tiny');
+
+            fileNames.forEach(async (filename) => {
+
+                const imagePath = path.join(__dirname, '..', 'uploads', filename);
+                            
+                compress(imagePath, savedPath, COMPRESS_QUALITY)
+                .then(() => console.log('Done'))
+                .catch(err => console.log(`Error in compressing: ${err}`));
+                
+            });
 
             fileNames.forEach(async (filename) => {
                 if (rabbitMQConnection) {
@@ -27,6 +43,7 @@ const uploadImage = async (req, res) => {
                     await channel.close();
                 }
             });
+            
         } catch (err) {
             console.log(err);
             res.render("404.ejs");
@@ -36,31 +53,42 @@ const uploadImage = async (req, res) => {
 };
 
 const getImage = async (req, res) => {
+    console.time('render-img');
     const model = global.modeler;
     const finalImages = [];
     const allPredictions = [];
+    const progress = { total: 0, completed: 0 };
+    const io = global._io;
     try {
         const messages = await getMessageFromQueue("imageQueue");
-
-        if (messages.length === 0) {
-            res.render("404.ejs");
-        } else {
-            await Promise.all(
+        const isValid = messages.length !== 0;
+        progress.total = messages.length;
+        if(isValid){
+             await Promise.all(
                 messages.map(async (message) => {
                     const { filename } = message;
 
-                    const imagePath = path.join( __dirname, "..", "uploads", filename,);
+                    const imagePath = path.join( __dirname, "..", "tiny", filename,);
+                    const outputImg = path.join(__dirname, "..", "outputs", filename,);
 
                     const result = await execImage(imagePath, model);
-
+                    fs.writeFileSync(outputImg, result.img);
+                    
                     finalImages.push(`data:image/jpeg;base64, ${result.img}`);
+
                     allPredictions.push(result.predictions);
+                    progress.completed++;
+
+                    io.emit('progress', progress);
                 }),
             );
+            console.timeEnd('render-img');
             res.render("displayImage.ejs", {
                 predictions: allPredictions,
                 finalImages: finalImages,
             });
+        } else {
+            res.render("404.ejs");
         }
     } catch (error) {
         console.error(error);
@@ -82,6 +110,7 @@ const uploadVideo = async (req, res) => {
             await channel.close();
         } else {
             console.log("Error connecting RabbitMQ");
+            res.render("404.ejs");
         }
         res.redirect("/render-video");
     } else {

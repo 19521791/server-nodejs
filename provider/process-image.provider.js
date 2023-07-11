@@ -7,7 +7,8 @@ const CLASS_THRESHOLD = 0.2;
 const execImage = async (imagePath, model) => {
     const predictions = await detectImage(imagePath, model);
     const img = fs.readFileSync(imagePath);
-    if (predictions) {
+    const img_ = img.toString("base64");
+    if (predictions.class === 1) {
         const [xmin, ymin, width, height] = predictions.bbox;
         const score = predictions.score;
         const predictedClass = predictions.class;
@@ -24,7 +25,7 @@ const execImage = async (imagePath, model) => {
 
         return { predictions: predictions, img: tempImage };
     } else {
-        return { predictions: null, img: null };
+        return { predictions: [], img: img_ };
     }
 };
 

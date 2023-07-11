@@ -1,7 +1,7 @@
 const tf = require("@tensorflow/tfjs-node");
+const sharp = require('sharp');
 
 const preprocess = async (source, modelWidth, modelHeight) => {
-    console.time("preprocess");
     const input = tf.tidy(() => {
         const img = tf.node.decodeImage(source, 3);
         const resizedImg = tf.image.resizeBilinear(img, [
@@ -12,8 +12,6 @@ const preprocess = async (source, modelWidth, modelHeight) => {
         const expandedImg = normalizedImg.expandDims();
         return expandedImg;
     });
-
-    console.timeEnd("preprocess");
     return [input];
 };
 
