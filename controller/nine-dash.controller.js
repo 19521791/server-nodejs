@@ -315,10 +315,13 @@ const getImage_URL = async (req, res) => {
             // fs.writeFileSync(imagePath, buffer);
             const tempImage = buffer.toString("base64");
             finalImages.push(`data:image/jpeg;base64, ${tempImage}`);
+            allPredictions.push(predictions);
+
           } else {
-            finalImages.push(null);
+            // finalImages.push(null);
+            // allPredictions.push(null);
           }
-          allPredictions.push(predictions);
+          // allPredictions.push(predictions);
         } catch (error) {
           console.log(error);
           continue;
