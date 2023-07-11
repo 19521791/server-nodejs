@@ -8,6 +8,7 @@ const { loadModel } = require("./service/ninedash/load-model.service");
 const tf = require("@tensorflow/tfjs-node");
 
 const { PORT } = process.env;
+global._io = io;
 
 const onConnection = (socket) => {
     registerHandlers(io, socket);
@@ -22,7 +23,22 @@ const onConnection = (socket) => {
 
     connectToRabbitMQ();
 
-    // io.on('connection', onConnection);
+    app.use((req, res, next) => {
+        res.io = io;
+        next();
+    });
+
+    io.on('connection', (socket) => {
+        console.log('Client connected');
+    
+        socket.on('disconnected', () => {
+            console.log('Client disconnected');
+        });
+
+        socket.on('progress', (progress) => {
+            socket.broadcast.emit('progress', progress);
+        })
+    })
 
     server.listen(PORT, () => console.log(`App are listening at ${PORT}`));
 })();

@@ -13,8 +13,8 @@ const compression = require("compression");
 app = express();
 app.use(
     compression({
-        level: 6,
-        threshold: 100 * 1000,
+        level: 9,
+        threshold: 100,
     }),
 );
 app.use(cors());

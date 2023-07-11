@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const framesDir = "/home/long1100/server/uploadVideos";
+const framesDir = "/home/long1100/server/tiny";
 
 const deleteFrames = (framesDir) => {
     fs.readdir(framesDir, (err, files) => {

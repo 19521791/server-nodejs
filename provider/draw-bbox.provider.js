@@ -6,7 +6,8 @@ const CLASS_THRESHOLD = 0.2;
 
 const draw = async (predictions, img_) => {
     const img = fs.readFileSync(img_);
-    if (predictions) {
+    const tempImg = img.toString("base64");
+    if (predictions.class === 1) {
         const [xmin, ymin, width, height] = predictions.bbox;
         const score = predictions.score;
         const predictedClass = predictions.class;
@@ -24,7 +25,7 @@ const draw = async (predictions, img_) => {
 
         return { predictions: predictions, img: tempImage };
     } else {
-        return { predictions: null, img: null };
+        return { predictions: null, img: tempImg };
     }
 };
 

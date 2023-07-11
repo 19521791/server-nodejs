@@ -1,7 +1,7 @@
 const tf = require("@tensorflow/tfjs-node");
 const path = require("path");
 
-const modelPath = path.join(__dirname, "model", "model.json");
+const modelPath = path.join(__dirname, "model_", "model.json");
 
 async function loadModel() {
     console.time("loadModel");
