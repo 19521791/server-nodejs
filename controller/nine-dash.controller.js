@@ -1,5 +1,5 @@
 const path = require("path");
-const detectImage = require("../service/ninedash/detect.service");
+// const detectImage = require("../service/ninedash/detect.service");
 const detectImage_handleimg = require("../service/ninedash/detect_handleimg.service");
 
 const renderBox = require("../service/ninedash/render-img.service");
@@ -10,9 +10,15 @@ const generateVideo = require("../service/ninedash/render-video.service");
 const { getRabbitMQConnection } = require('../config/rabbit-mq.config');
 const { getMessageFromQueue } = require('../provider/ready-for-rabbit.provider');
 const axios = require('axios');
-
-
+const compress = require('../service/ninedash/compress.service');
+const compareFramesAndInfer = require('../provider/infer-video.provider');
 const execImage = require('../provider/process-image.provider');
+
+
+
+const COMPRESS_QUALITY = 50;
+const MATCHED_THRESHOLD = 0.1;
+
 
 const uploadImage = async (req, res) => {
     if (req.files) {
@@ -34,7 +40,6 @@ const uploadImage = async (req, res) => {
             });
 
             fileNames.forEach(async (filename) => {
-              console.log("path=" + filename)
                 if(rabbitMQConnection){
                     const channel = await rabbitMQConnection.createChannel();
                     await channel.assertQueue("imageQueue");
@@ -88,6 +93,7 @@ const getImage = async (req, res) => {
             res.render("displayImage.ejs", {
                 predictions: allPredictions,
                 finalImages: finalImages,
+                path: "/nine-dash-url"
             });
         } else {
             res.render("404.ejs");
@@ -136,7 +142,7 @@ const renderVideo = async (req, res) => {
 
         await compareFramesAndInfer(
             destPath,
-            THRESHOLD_MATCHED,
+            MATCHED_THRESHOLD,
             frameNames,
             model,
             outputPredictFrame,
@@ -163,7 +169,6 @@ const extract_img_from_web = async (req, res) => {
         res.status(400).send("No url");
     } else {
         console.log("Success scan url!");
-        console.log(url);
         const list_img_url = await extract_img_URL(url);
 
         if (!list_img_url) {
@@ -174,7 +179,6 @@ const extract_img_from_web = async (req, res) => {
                 const rabbitMQConnection = getRabbitMQConnection();
                 list_img_url.forEach(async (img_url) => {
                     if(rabbitMQConnection && !img_url.endsWith('.webp')){
-                      console.log(img_url)
                       const channel = await rabbitMQConnection.createChannel();
                       await channel.assertQueue("imageURLQueue");
                       channel.sendToQueue("imageURLQueue", Buffer.from(JSON.stringify({ img_url })));
@@ -217,8 +221,6 @@ const getImage_URL = async (req, res) => {
             responseType: 'arraybuffer'
           });
           handleImage = Buffer.from(response.data, 'binary');
-          // fs.writeFileSync('image.jpg', handleImage);
-          // console.log('Hình ảnh đã được tải về và lưu vào biến handleImage');
           const predictions = await detectImage_handleimg(handleImage, model);
           if (predictions && predictions.class == 1) {
             const [xmin, ymin, width, height] = predictions.bbox;
