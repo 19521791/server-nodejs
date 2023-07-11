@@ -1,18 +1,19 @@
 version: "3"
 services:
-  my-container:
-    image: server
-    ports:
-      - 8080:3500
-    volumes:
-      # - /home/long1100/server:/usr/src/app
-      - /home/ducbui/ducbui/server:/usr/src/app
-    depends_on:
-      - rabbitmq
-
   rabbitmq:
     image: rabbitmq:latest
     ports:
       - 5672:5672
       - 15672:15672
-  
+
+  my-container:
+    depends_on:
+      - rabbitmq
+    image: server
+    ports:
+      - 8080:3500
+    volumes:
+      - /home/long1100/server:/usr/src/app
+    command: sh -c "sleep 7 && npm start"
+   
+    

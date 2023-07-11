@@ -2,12 +2,20 @@ const fs = require("fs");
 const preprocess = require("./preprocess.service");
 const tf = require("@tensorflow/tfjs-node");
 
+const calculateTensorSize = (tensor) => {
+    const shape = tensor.shape;
+    const dataTypeSize = Float32Array.BYTES_PER_ELEMENT;
+  
+    const dataSize = shape.reduce((acc, dim) => acc * dim, 1) * dataTypeSize;
+  
+    return dataSize;
+  }
+
 const detectImage = async (imgSource, model) => {
-    console.time('detect');
     const predictions = [];
     const [modelWidth, modelHeight] = model.inputShape.slice(1, 3);
     const buffer = fs.readFileSync(imgSource);
-    const [input, xRatio, yRatio] = await preprocess(
+    const [input] = await preprocess(
         buffer,
         modelWidth,
         modelHeight,
@@ -20,10 +28,8 @@ const detectImage = async (imgSource, model) => {
         bbox: boxesData.slice(0, 4),
         score: scoresData[0],
         class: classesData[0],
-        ratio: [xRatio, yRatio],
     });
     tf.dispose([boxes, scores, classes, input]);
-    console.timeEnd('detect');
     return predictions[0];
 };
 
