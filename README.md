@@ -7,6 +7,7 @@
 
 <div>
   <p>Code structure</p>
+  <img src="folder_structure.png" align="right">
 <table>
   <thead>
     <tr>
@@ -45,7 +46,7 @@
     </tr>
   </tbody>
 </table>
-<img src="folder_structure.png" align="right">
+
 </div>
 
 <p>Setup guide</p>
