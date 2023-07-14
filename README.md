@@ -22,7 +22,7 @@
     </tr>
     <tr>
       <td>controller</td>
-      <td>Handle get and post mehthod</td>
+      <td>Handle get and post method</td>
     </tr>
     <tr>
       <td>middleware</td>
