@@ -7,7 +7,7 @@ const io = socketIO(server);
 const { loadModel } = require("./service/ninedash/load-model.service");
 const tf = require("@tensorflow/tfjs-node");
 
-const { PORT } = process.env;
+const { PORT } = process.env.PUBLISH_PORT;
 global._io = io;
 
 const onConnection = (socket) => {

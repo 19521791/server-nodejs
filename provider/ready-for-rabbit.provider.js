@@ -16,7 +16,7 @@ const getMessageFromQueue = async (queueName) => {
         messages.push(JSON.parse(message.content.toString()));
         channel.ack(message);
     }
-
+    
     return messages;
 };
 
