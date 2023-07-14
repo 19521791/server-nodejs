@@ -5,7 +5,7 @@ services:
         - rabbitmq
       networks:
         - rabbit-network
-      image: server
+      image: long1100/yolov5-nodejs:v1.1.0
       ports:
         - 8080:3500
       # volumes:
