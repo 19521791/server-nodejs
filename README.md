@@ -7,7 +7,7 @@
 
 <div>
   <p>Code structure</p>
-<table align="left">
+<table>
   <thead>
     <tr>
       <th scope="col">folder</th>
