@@ -5,7 +5,8 @@
 <img src="home.png" alt="Maybe here is a picture">
 <img src="result_.png" alt="Maybe here is a picture">
 
-<p>Code structure</p>
+<div>
+  <p>Code structure</p>
 <table align="left">
   <thead>
     <tr>
@@ -45,6 +46,7 @@
   </tbody>
 </table>
 <img src="folder_structure.png" align="right">
+</div>
 
 <p>Setup guide</p>
 <p></p>
