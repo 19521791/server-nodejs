@@ -73,3 +73,4 @@
   </ul>
 </ul>
 <p>NOTE: If you encounter an error related to ffmpeg while detecting with a video, it may be because the two folders "DETECTS" and "FRAMES" are missing when pushing. These are two temporary folders used to store the extracted frames. Please create the "DETECTS" folder and the "FRAMES" folder using the commands <b>mkdir DETECTS</b> and <b>mkdir FRAMES</b> respectively.</p>
+<p>I'm sorry for forgetting to adjust the mapping port and publish port to match each other when building the image. Therefore, please search in your browser for <b>localhost:8080</b></p>
