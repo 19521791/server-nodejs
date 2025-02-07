@@ -1,5 +1,3 @@
-<h1 align="center">HOW TO IMPLEMENT A DEEPLEARNING MODEL INTO SERVER</h1>
-
 <h2 align="center">DETECTING NINE DASH LINE IN IMAGES OR VIDEO</h2>
 
 <img src="home.png" alt="Maybe here is a picture">
